@@ -241,6 +241,8 @@ export function AppProvider({ children }) {
   const [activePage, setActivePage] = useState("dashboard");
   const [theme, setThemeState] = useState(getInitialTheme);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showLogin, setShowLogin] = useState(true);
+  const [showHome, setShowHome] = useState(true);
 
   const setTheme = (newTheme) => {
     if (newTheme === "light" || newTheme === "dark" || newTheme === "auto") {
@@ -287,6 +289,31 @@ export function AppProvider({ children }) {
   const logout = () => {
     setUser(null);
     setActivePage("dashboard");
+    setShowLogin(true);
+  };
+
+  const register = (name, email, password, professionalType, crm) => {
+    if (name && email && password && crm) {
+      const isVeterinary = professionalType === "veterinary";
+      const avatar = name
+        .split(" ")
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase();
+      setUser({
+        name,
+        email,
+        role: isVeterinary
+          ? "Médica Veterinária — Clínica de Pequenos Animais"
+          : "Médico — Cardiologia",
+        avatar,
+        professionalType,
+        crm,
+      });
+      return true;
+    }
+    return false;
   };
 
   const addPatient = (p) => {
@@ -351,6 +378,11 @@ export function AppProvider({ children }) {
         user,
         login,
         logout,
+        register,
+        showLogin,
+        setShowLogin,
+        showHome,
+        setShowHome,
         patients,
         addPatient,
         updatePatient,

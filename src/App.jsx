@@ -1,6 +1,8 @@
 import React from "react";
 import { AppProvider, useApp } from "./context/AppContext";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Sidebar from "./components/Sidebar";
 import Topbar from "./components/Topbar";
 import Dashboard from "./pages/Dashboard";
@@ -13,9 +15,11 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 
 function AppContent() {
-  const { user, activePage, sidebarOpen, closeSidebar } = useApp();
+  const { user, activePage, sidebarOpen, closeSidebar, showHome, showLogin } =
+    useApp();
 
-  if (!user) return <Login />;
+  if (showHome && !user) return <Home />;
+  if (!user) return showLogin ? <Login /> : <Register />;
 
   const pages = {
     dashboard: <Dashboard />,

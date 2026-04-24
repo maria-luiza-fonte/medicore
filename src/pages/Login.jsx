@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
 
 export default function Login() {
-  const { login } = useApp();
+  const { login, setShowLogin, setShowHome } = useApp();
   const [email, setEmail] = useState("dr.ricardo@medicore.com");
   const [password, setPassword] = useState("senha123");
   const [professionalType, setProfessionalType] = useState("medical");
@@ -245,18 +245,55 @@ export default function Login() {
           </form>
         </div>
 
-        {/* Demo hint */}
-        <div className="text-center mt-3 fade-in anim-delay-2">
-          <p style={{ color: "var(--mc-slate)", fontSize: 12 }}>
-            <i className="bi bi-info-circle me-1"></i>
-            Troque o perfil para testar Médico ou Médico Veterinário
+        {/* Create account link */}
+        <div className="text-center mt-4 fade-in anim-delay-2">
+          <p style={{ color: "var(--mc-slate)", fontSize: 13 }}>
+            Não tem conta?{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setShowHome(false);
+                setShowLogin(false);
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--mc-teal)",
+                fontWeight: 600,
+                cursor: "pointer",
+                textDecoration: "underline",
+                padding: 0,
+                font: "inherit",
+              }}
+            >
+              Crie uma agora
+            </button>
+          </p>
+          <p style={{ fontSize: 12, color: "var(--mc-slate)", marginTop: 12 }}>
+            ou{" "}
+            <button
+              type="button"
+              onClick={() => setShowHome(true)}
+              style={{
+                background: "none",
+                border: "none",
+                color: "var(--mc-slate)",
+                fontWeight: 500,
+                cursor: "pointer",
+                textDecoration: "underline",
+                padding: 0,
+                font: "inherit",
+              }}
+            >
+              volte para o início
+            </button>
           </p>
         </div>
 
         {/* Footer */}
         <div className="text-center mt-5 fade-in anim-delay-3">
           <p style={{ color: "var(--mc-slate)", fontSize: 11, opacity: 0.5 }}>
-            © 2025 MediCore · LGPD Compliant · CFM Homologado
+            © 2026 MediCore · LGPD Compliant · CFM Homologado
           </p>
         </div>
       </div>
