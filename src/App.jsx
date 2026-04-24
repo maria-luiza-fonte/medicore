@@ -13,7 +13,7 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 
 function AppContent() {
-  const { user, activePage } = useApp();
+  const { user, activePage, sidebarOpen, closeSidebar } = useApp();
 
   if (!user) return <Login />;
 
@@ -30,6 +30,11 @@ function AppContent() {
 
   return (
     <div className="mc-layout">
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={closeSidebar} />
+      )}
+
       <Sidebar />
       <div className="mc-main">
         <Topbar />

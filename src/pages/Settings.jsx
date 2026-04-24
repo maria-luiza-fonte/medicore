@@ -99,6 +99,13 @@ export default function Settings() {
               >
                 <i className="bi bi-moon-stars me-2"></i>Modo escuro
               </button>
+
+              <button
+                className={`btn ${theme === "auto" ? "btn-teal" : "btn-ghost"}`}
+                onClick={() => setTheme("auto")}
+              >
+                <i className="bi bi-circle-half me-2"></i>Seguir navegador
+              </button>
             </div>
 
             <div
@@ -111,7 +118,11 @@ export default function Settings() {
             >
               Tema atual:{" "}
               <strong style={{ color: "var(--mc-text)" }}>
-                {theme === "dark" ? "Escuro" : "Claro"}
+                {theme === "auto"
+                  ? "Automático (seguindo as preferências do navegador)"
+                  : theme === "dark"
+                    ? "Escuro"
+                    : "Claro"}
               </strong>
             </div>
           </div>

@@ -219,12 +219,18 @@ const INITIAL_URGENCY_QUEUE = [
 
 const THEME_STORAGE_KEY = "mc-theme";
 
+const getSystemTheme = () =>
+  window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
 const getInitialTheme = () => {
   const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-  if (savedTheme === "light" || savedTheme === "dark") return savedTheme;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  if (savedTheme === "light" || savedTheme === "dark" || savedTheme === "auto")
+    return savedTheme;
+  return "auto";
+};
+
+const getEffectiveTheme = (theme) => {
+  return theme === "auto" ? getSystemTheme() : theme;
 };
 
 export function AppProvider({ children }) {
@@ -233,22 +239,33 @@ export function AppProvider({ children }) {
   const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
   const [urgencyQueue, setUrgencyQueue] = useState(INITIAL_URGENCY_QUEUE);
   const [activePage, setActivePage] = useState("dashboard");
-  const [theme, setTheme] = useState(getInitialTheme);
+  const [theme, setThemeState] = useState(getInitialTheme);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const setTheme = (newTheme) => {
+    if (newTheme === "light" || newTheme === "dark" || newTheme === "auto") {
+      setThemeState(newTheme);
+      localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+    }
+  };
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    const effectiveTheme = getEffectiveTheme(theme);
+    document.documentElement.setAttribute("data-theme", effectiveTheme);
   }, [theme]);
 
   useEffect(() => {
-    if (localStorage.getItem(THEME_STORAGE_KEY)) return;
-
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const onThemeChange = (event) => setTheme(event.matches ? "dark" : "light");
+    const onThemeChange = () => {
+      if (theme === "auto") {
+        const effectiveTheme = getEffectiveTheme("auto");
+        document.documentElement.setAttribute("data-theme", effectiveTheme);
+      }
+    };
 
     mediaQuery.addEventListener("change", onThemeChange);
     return () => mediaQuery.removeEventListener("change", onThemeChange);
-  }, []);
+  }, [theme]);
 
   const login = (email, password, professionalType = "medical") => {
     if (email && password) {
@@ -321,8 +338,12 @@ export function AppProvider({ children }) {
         .sort((a, b) => a.level - b.level),
     );
 
-  const toggleTheme = () =>
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  const toggleSidebarOpen = () => setSidebarOpen((prev) => !prev);
+  const closeSidebar = () => setSidebarOpen(false);
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   return (
     <AppContext.Provider
@@ -345,6 +366,9 @@ export function AppProvider({ children }) {
         theme,
         setTheme,
         toggleTheme,
+        sidebarOpen,
+        toggleSidebarOpen,
+        closeSidebar,
       }}
     >
       {children}

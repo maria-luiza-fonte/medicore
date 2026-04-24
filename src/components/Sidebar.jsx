@@ -24,13 +24,26 @@ const navItems = [
 ];
 
 export default function Sidebar() {
-  const { activePage, setActivePage, urgencyQueue, logout, user } = useApp();
+  const {
+    activePage,
+    setActivePage,
+    urgencyQueue,
+    logout,
+    user,
+    sidebarOpen,
+    closeSidebar,
+  } = useApp();
   const pendingUrgency = urgencyQueue.filter(
     (u) => u.status === "waiting",
   ).length;
 
+  const handleNavClick = (pageId) => {
+    setActivePage(pageId);
+    closeSidebar();
+  };
+
   return (
-    <aside className="mc-sidebar">
+    <aside className={`mc-sidebar ${sidebarOpen ? "open" : ""}`}>
       {/* Logo */}
       <div className="mc-sidebar-logo">
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -91,7 +104,7 @@ export default function Sidebar() {
             <button
               key={item.id}
               className={`mc-nav-item ${activePage === item.id ? "active" : ""}`}
-              onClick={() => setActivePage(item.id)}
+              onClick={() => handleNavClick(item.id)}
             >
               <i className={`bi ${item.icon}`}></i>
               <span style={{ flex: 1 }}>{item.label}</span>

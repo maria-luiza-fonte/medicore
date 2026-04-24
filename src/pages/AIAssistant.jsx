@@ -84,6 +84,7 @@ export default function AIAssistant() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const messagesEndRef = useRef(null);
 
   const storedApiKey = localStorage.getItem(OPENROUTER_KEY_STORAGE) || "";
@@ -502,7 +503,7 @@ export default function AIAssistant() {
               borderTop: "1px solid var(--mc-border-subtle)",
             }}
           >
-            <div style={{ display: "flex", gap: 10 }}>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <textarea
                 className="mc-input form-control"
                 rows={2}
@@ -513,20 +514,37 @@ export default function AIAssistant() {
                 style={{ resize: "none" }}
                 disabled={loading}
               />
-              <button
-                className="btn btn-teal"
-                onClick={() => sendMessage()}
-                disabled={loading || !input.trim()}
-                style={{ alignSelf: "flex-end", padding: "10px 16px" }}
-              >
-                <i className="bi bi-send-fill"></i>
-              </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button
+                  className="btn btn-teal"
+                  onClick={() => sendMessage()}
+                  disabled={loading || !input.trim()}
+                  style={{ alignSelf: "flex-end", padding: "10px 16px" }}
+                >
+                  <i className="bi bi-send-fill"></i>
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  onClick={() => setShowSuggestions(!showSuggestions)}
+                  id="ai-suggestions-toggle"
+                  style={{
+                    display: "none",
+                    alignSelf: "flex-end",
+                    padding: "10px 16px",
+                  }}
+                >
+                  <i
+                    className={`bi bi-lightbulb${showSuggestions ? "-fill" : ""}`}
+                  ></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Suggestions sidebar */}
+        {/* Suggestions sidebar - desktop */}
         <div
+          id="ai-suggestions-desktop"
           style={{
             width: 260,
             display: "flex",
@@ -611,6 +629,77 @@ export default function AIAssistant() {
             <i className="bi bi-arrow-clockwise me-2"></i>Nova conversa
           </button>
         </div>
+
+        {/* Suggestions modal - mobile */}
+        {showSuggestions && (
+          <div
+            className="mc-modal-overlay"
+            onClick={() => setShowSuggestions(false)}
+          >
+            <div
+              className="mc-modal"
+              onClick={(e) => e.stopPropagation()}
+              style={{ maxWidth: "90%", maxHeight: "80vh", overflowY: "auto" }}
+            >
+              <div className="mc-modal-header">
+                <h4
+                  style={{
+                    fontFamily: "var(--font-display)",
+                    fontSize: 18,
+                    margin: 0,
+                  }}
+                >
+                  Perguntas Sugeridas
+                </h4>
+                <button
+                  className="btn-ghost btn"
+                  style={{ padding: "4px 8px" }}
+                  onClick={() => setShowSuggestions(false)}
+                >
+                  <i className="bi bi-x-lg"></i>
+                </button>
+              </div>
+              <div className="mc-modal-body">
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                >
+                  {suggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      className="btn-ghost btn"
+                      style={{
+                        textAlign: "left",
+                        fontSize: 13,
+                        padding: "12px 16px",
+                        lineHeight: 1.4,
+                        border: "1px solid var(--mc-border-subtle)",
+                        borderRadius: 8,
+                        transition: "all 0.15s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.background =
+                          "var(--mc-surface-2)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                      onClick={() => {
+                        sendMessage(s);
+                        setShowSuggestions(false);
+                      }}
+                    >
+                      <i
+                        className="bi bi-lightbulb-fill me-2"
+                        style={{ color: "#f59e0b" }}
+                      ></i>
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

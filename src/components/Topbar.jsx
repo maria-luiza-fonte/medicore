@@ -13,8 +13,14 @@ const titles = {
 };
 
 export default function Topbar() {
-  const { activePage, urgencyQueue, setActivePage, theme, toggleTheme } =
-    useApp();
+  const {
+    activePage,
+    urgencyQueue,
+    setActivePage,
+    theme,
+    toggleTheme,
+    toggleSidebarOpen,
+  } = useApp();
   const pendingUrgency = urgencyQueue.filter(
     (u) => u.status === "waiting",
   ).length;
@@ -26,25 +32,44 @@ export default function Topbar() {
 
   return (
     <div className="mc-topbar">
-      <div>
-        <div
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {/* Menu toggle for mobile - inline */}
+        <button
+          className="btn-ghost btn"
           style={{
-            fontSize: 16,
-            fontWeight: 600,
-            color: "var(--mc-text)",
-            fontFamily: "var(--font-display)",
+            padding: "5px 8px",
+            display: "none",
+            minWidth: 32,
           }}
+          onClick={toggleSidebarOpen}
+          title="Abrir menu"
+          aria-label="Abrir menu de navegação"
+          id="sidebar-toggle"
         >
-          {titles[activePage]}
-        </div>
-        <div
-          style={{
-            fontSize: 11,
-            color: "var(--mc-slate)",
-            textTransform: "capitalize",
-          }}
-        >
-          {today}
+          <i className="bi bi-list" style={{ fontSize: 18 }}></i>
+        </button>
+
+        {/* Title and date */}
+        <div>
+          <div
+            style={{
+              fontSize: 16,
+              fontWeight: 600,
+              color: "var(--mc-text)",
+              fontFamily: "var(--font-display)",
+            }}
+          >
+            {titles[activePage]}
+          </div>
+          <div
+            style={{
+              fontSize: 11,
+              color: "var(--mc-slate)",
+              textTransform: "capitalize",
+            }}
+          >
+            {today}
+          </div>
         </div>
       </div>
 
@@ -81,13 +106,29 @@ export default function Topbar() {
           className="btn-ghost btn"
           style={{ padding: "5px 10px" }}
           onClick={toggleTheme}
-          title={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}
+          title={
+            theme === "dark"
+              ? "Ativar modo claro"
+              : theme === "light"
+                ? "Ativar modo escuro"
+                : "Ativar modo manual"
+          }
           aria-label={
-            theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"
+            theme === "dark"
+              ? "Ativar modo claro"
+              : theme === "light"
+                ? "Ativar modo escuro"
+                : "Ativar modo manual"
           }
         >
           <i
-            className={`bi ${theme === "dark" ? "bi-sun" : "bi-moon-stars"}`}
+            className={`bi ${
+              theme === "dark"
+                ? "bi-sun"
+                : theme === "light"
+                  ? "bi-moon-stars"
+                  : "bi-circle-half"
+            }`}
             style={{ fontSize: 15 }}
           ></i>
         </button>
