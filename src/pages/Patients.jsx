@@ -16,20 +16,30 @@ const EMPTY = {
 const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 export default function Patients() {
-  const { patients, addPatient, updatePatient, deletePatient } = useApp();
+  const { user, patients, addPatient, updatePatient, deletePatient } = useApp();
   const [search, setSearch] = useState("");
+  const [selectedInsurance, setSelectedInsurance] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
   const [expandedId, setExpandedId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  const filtered = patients.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.cpf.includes(search) ||
-      p.email.toLowerCase().includes(search.toLowerCase()),
-  );
+  const userPatients = patients.filter((p) => p.doctorId === user?.doctorId);
+  const availableInsurances = [
+    ...new Set(userPatients.map((p) => p.insurance)),
+  ].sort();
+
+  const filtered = userPatients
+    .filter((p) =>
+      selectedInsurance ? p.insurance === selectedInsurance : true,
+    )
+    .filter(
+      (p) =>
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.cpf.includes(search) ||
+        p.email.toLowerCase().includes(search.toLowerCase()),
+    );
 
   const openNew = () => {
     setEditing(null);
@@ -57,7 +67,7 @@ export default function Patients() {
         <div>
           <h1 className="mc-page-title">Pacientes</h1>
           <p className="mc-page-subtitle">
-            {patients.length} pacientes cadastrados
+            {userPatients.length} pacientes cadastrados
           </p>
         </div>
         <button className="btn btn-teal px-4 py-2" onClick={openNew}>
@@ -80,13 +90,17 @@ export default function Patients() {
             </div>
           </div>
           <div className="col-md-3">
-            <select className="mc-input form-select">
-              <option>Todos os convênios</option>
-              <option>Unimed</option>
-              <option>Bradesco Saúde</option>
-              <option>SulAmérica</option>
-              <option>Amil</option>
-              <option>Particular</option>
+            <select
+              className="mc-input form-select"
+              value={selectedInsurance}
+              onChange={(e) => setSelectedInsurance(e.target.value)}
+            >
+              <option value="">Todos os convênios</option>
+              {availableInsurances.map((insurance) => (
+                <option key={insurance} value={insurance}>
+                  {insurance}
+                </option>
+              ))}
             </select>
           </div>
           <div className="col-md-3 text-end">

@@ -62,8 +62,9 @@ const VETERINARY_SUGGESTIONS = [
 ];
 
 export default function AIAssistant() {
-  const { patients, user } = useApp();
+  const { user, patients } = useApp();
   const isVeterinary = user?.professionalType === "veterinary";
+  const userPatients = patients.filter((p) => p.doctorId === user?.doctorId);
   const scopeInstruction = isVeterinary
     ? VETERINARY_SCOPE_INSTRUCTION
     : MEDICAL_SCOPE_INSTRUCTION;
@@ -234,7 +235,9 @@ export default function AIAssistant() {
     if (!text || loading) return;
     setInput("");
 
-    const patient = patients.find((p) => p.id === parseInt(selectedPatient));
+    const patient = userPatients.find(
+      (p) => p.id === parseInt(selectedPatient),
+    );
     const contextMsg = patient
       ? isVeterinary
         ? `[Contexto do paciente veterinário: ${patient.name}, ${Math.floor((Date.now() - new Date(patient.dob)) / (365.25 * 24 * 3600 * 1000))} anos (idade estimada), alergias registradas: ${patient.allergies}, condições: ${patient.conditions || "nenhuma"}. Considerar avaliação por espécie, peso e histórico do tutor.]\n\n${text}`
@@ -393,21 +396,12 @@ export default function AIAssistant() {
               onChange={(e) => setSelectedPatient(e.target.value)}
             >
               <option value="">Consulta geral (sem paciente)</option>
-              {patients.map((p) => (
+              {userPatients.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
                 </option>
               ))}
             </select>
-            <span
-              className="mc-badge"
-              style={{
-                background: "var(--mc-teal-pale)",
-                color: "var(--mc-teal)",
-              }}
-            >
-              Modelo: {model}
-            </span>
             {selectedPatient && (
               <span style={{ fontSize: 12, color: "var(--mc-teal)" }}>
                 <i className="bi bi-check-circle me-1"></i>Contexto do paciente

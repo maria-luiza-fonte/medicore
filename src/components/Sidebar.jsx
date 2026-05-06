@@ -25,16 +25,16 @@ const navItems = [
 
 export default function Sidebar() {
   const {
+    user,
     activePage,
     setActivePage,
     urgencyQueue,
     logout,
-    user,
     sidebarOpen,
     closeSidebar,
   } = useApp();
   const pendingUrgency = urgencyQueue.filter(
-    (u) => u.status === "waiting",
+    (u) => u.status === "waiting" && u.doctor === user?.name,
   ).length;
 
   const handleNavClick = (pageId) => {

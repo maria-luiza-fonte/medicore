@@ -43,12 +43,14 @@ const statusClass = {
 
 export default function Appointments() {
   const {
+    user,
     appointments,
     addAppointment,
     updateAppointment,
     patients,
     addUrgency,
   } = useApp();
+  const userPatients = patients.filter((p) => p.doctorId === user?.doctorId);
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [filterStatus, setFilterStatus] = useState("all");
@@ -57,13 +59,15 @@ export default function Appointments() {
   const [urgencyForm, setUrgencyForm] = useState({ reason: "", level: 2 });
   const [expandedId, setExpandedId] = useState(null);
 
-  const filtered = appointments.filter((a) => {
-    const matchStatus = filterStatus === "all" || a.status === filterStatus;
-    const matchSearch =
-      a.patientName.toLowerCase().includes(search.toLowerCase()) ||
-      a.doctor.toLowerCase().includes(search.toLowerCase());
-    return matchStatus && matchSearch;
-  });
+  const filtered = appointments
+    .filter((a) => a.doctor === user?.name)
+    .filter((a) => {
+      const matchStatus = filterStatus === "all" || a.status === filterStatus;
+      const matchSearch =
+        a.patientName.toLowerCase().includes(search.toLowerCase()) ||
+        a.doctor.toLowerCase().includes(search.toLowerCase());
+      return matchStatus && matchSearch;
+    });
 
   const f = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
 
@@ -99,7 +103,7 @@ export default function Appointments() {
         <div>
           <h1 className="mc-page-title">Agendamentos</h1>
           <p className="mc-page-subtitle">
-            {appointments.length} consultas registradas
+            {filtered.length} consultas registradas
           </p>
         </div>
         <button
@@ -261,18 +265,21 @@ export default function Appointments() {
                             {a.specialty}
                           </span>
                         </div>
-                        {a.urgency && (
-                          <div>
-                            <span
-                              style={{ color: "var(--mc-slate)", fontSize: 11 }}
-                            >
-                              Urgência:
-                            </span>{" "}
-                            <span style={{ color: "#ef4444", fontWeight: 600 }}>
-                              Nível {a.urgency}
-                            </span>
-                          </div>
-                        )}
+                        <div>
+                          <span
+                            style={{ color: "var(--mc-slate)", fontSize: 11 }}
+                          >
+                            Urgência:
+                          </span>{" "}
+                          <span
+                            style={{
+                              color: a.urgency ? "#ef4444" : "var(--mc-slate)",
+                              fontWeight: a.urgency ? 600 : 400,
+                            }}
+                          >
+                            {a.urgency ? `Nível ${a.urgency}` : "Sem urgência"}
+                          </span>
+                        </div>
                       </div>
                     </div>
 
@@ -488,7 +495,7 @@ export default function Appointments() {
                     className="mc-input form-select"
                     value={form.patientId}
                     onChange={(e) => {
-                      const p = patients.find(
+                      const p = userPatients.find(
                         (p) => p.id === parseInt(e.target.value),
                       );
                       f("patientId", e.target.value);
@@ -496,7 +503,7 @@ export default function Appointments() {
                     }}
                   >
                     <option value="">Selecione o paciente...</option>
-                    {patients.map((p) => (
+                    {userPatients.map((p) => (
                       <option key={p.id} value={p.id}>
                         {p.name}
                       </option>

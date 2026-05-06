@@ -14,8 +14,9 @@ const INITIAL_PATIENTS = [
     allergies: "Penicilina",
     conditions: "Hipertensão",
     insurance: "Unimed",
-    createdAt: "2024-01-10",
+    createdAt: "2026-01-10",
     urgency: null,
+    doctorId: 1,
   },
   {
     id: 2,
@@ -28,8 +29,9 @@ const INITIAL_PATIENTS = [
     allergies: "Nenhuma",
     conditions: "Diabetes Tipo 2",
     insurance: "Bradesco Saúde",
-    createdAt: "2024-01-15",
+    createdAt: "2026-01-15",
     urgency: 1,
+    doctorId: 1,
   },
   {
     id: 3,
@@ -42,8 +44,9 @@ const INITIAL_PATIENTS = [
     allergies: "Dipirona",
     conditions: "Asma",
     insurance: "SulAmérica",
-    createdAt: "2024-02-01",
+    createdAt: "2026-02-01",
     urgency: 2,
+    doctorId: 2,
   },
   {
     id: 4,
@@ -56,8 +59,9 @@ const INITIAL_PATIENTS = [
     allergies: "Aspirina",
     conditions: "Cardiopatia",
     insurance: "Particular",
-    createdAt: "2024-02-10",
+    createdAt: "2026-02-10",
     urgency: 1,
+    doctorId: 1,
   },
   {
     id: 5,
@@ -70,8 +74,9 @@ const INITIAL_PATIENTS = [
     allergies: "Nenhuma",
     conditions: "Saudável",
     insurance: "Amil",
-    createdAt: "2024-02-20",
+    createdAt: "2026-02-20",
     urgency: null,
+    doctorId: 2,
   },
   {
     id: 6,
@@ -84,8 +89,9 @@ const INITIAL_PATIENTS = [
     allergies: "Sulfa",
     conditions: "DPOC, Hipertensão",
     insurance: "Unimed",
-    createdAt: "2024-03-05",
+    createdAt: "2026-03-05",
     urgency: 3,
+    doctorId: 2,
   },
 ];
 
@@ -272,6 +278,7 @@ export function AppProvider({ children }) {
   const login = (email, password, professionalType = "medical") => {
     if (email && password) {
       const isVeterinary = professionalType === "veterinary";
+      const doctorId = isVeterinary ? 3 : email.includes("ricardo") ? 1 : 2;
       setUser({
         name: isVeterinary ? "Dra. Camila Rocha" : "Dr. Ricardo Mendes",
         email,
@@ -280,6 +287,7 @@ export function AppProvider({ children }) {
           : "Médico — Cardiologia",
         avatar: isVeterinary ? "CR" : "RM",
         professionalType,
+        doctorId,
       });
       return true;
     }
@@ -295,6 +303,7 @@ export function AppProvider({ children }) {
   const register = (name, email, password, professionalType, crm) => {
     if (name && email && password && crm) {
       const isVeterinary = professionalType === "veterinary";
+      const doctorId = isVeterinary ? 3 : email.includes("ricardo") ? 1 : 2;
       const avatar = name
         .split(" ")
         .slice(0, 2)
@@ -310,6 +319,7 @@ export function AppProvider({ children }) {
         avatar,
         professionalType,
         crm,
+        doctorId,
       });
       return true;
     }
@@ -322,6 +332,7 @@ export function AppProvider({ children }) {
       id: Date.now(),
       createdAt: new Date().toISOString().split("T")[0],
       urgency: null,
+      doctorId: user?.doctorId || null,
     };
     setPatients((prev) => [...prev, newP]);
     return newP;
