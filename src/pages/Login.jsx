@@ -11,7 +11,9 @@ export default function Login() {
 
   const handleProfessionalTypeChange = (type) => {
     setProfessionalType(type);
-    if (type === "veterinary") {
+    if (type === "admin") {
+      setEmail("admin@medicore.com");
+    } else if (type === "veterinary") {
       setEmail("dra.camila@medicorevet.com");
     } else {
       setEmail("dr.ricardo@medicore.com");
@@ -105,7 +107,7 @@ export default function Login() {
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="mc-label d-block">Perfil profissional</label>
-              <div className="d-flex gap-2">
+              <div className="d-flex gap-2" style={{ flexWrap: "wrap" }}>
                 <button
                   type="button"
                   className={`btn ${professionalType === "medical" ? "btn-teal" : "btn-ghost"}`}
@@ -119,6 +121,13 @@ export default function Login() {
                   onClick={() => handleProfessionalTypeChange("veterinary")}
                 >
                   <i className="bi bi-heart me-2"></i>Médico Veterinário
+                </button>
+                <button
+                  type="button"
+                  className={`btn ${professionalType === "admin" ? "btn-teal" : "btn-ghost"}`}
+                  onClick={() => handleProfessionalTypeChange("admin")}
+                >
+                  <i className="bi bi-shield-lock me-2"></i>Admin
                 </button>
               </div>
             </div>

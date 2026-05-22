@@ -1,7 +1,7 @@
 import React from "react";
 import { useApp } from "../context/AppContext";
 
-const navItems = [
+const medicalNavItems = [
   { section: "Principal" },
   { id: "dashboard", label: "Dashboard", icon: "bi-grid-1x2" },
   { id: "appointments", label: "Agendamentos", icon: "bi-calendar2-week" },
@@ -23,6 +23,13 @@ const navItems = [
   { id: "settings", label: "Configurações", icon: "bi-gear" },
 ];
 
+const adminNavItems = [
+  { section: "Principal" },
+  { id: "admin", label: "Painel Administrativo", icon: "bi-shield-lock" },
+  { section: "Sistema" },
+  { id: "settings", label: "Configurações", icon: "bi-gear" },
+];
+
 export default function Sidebar() {
   const {
     user,
@@ -33,6 +40,10 @@ export default function Sidebar() {
     sidebarOpen,
     closeSidebar,
   } = useApp();
+
+  const isAdmin = user?.professionalType === "admin";
+  const navItems = isAdmin ? adminNavItems : medicalNavItems;
+
   const pendingUrgency = urgencyQueue.filter(
     (u) => u.status === "waiting" && u.doctor === user?.name,
   ).length;
@@ -61,7 +72,7 @@ export default function Sidebar() {
             }}
           >
             <i
-              className="bi bi-heart-pulse-fill"
+              className={`bi ${isAdmin ? "bi-shield-lock" : "bi-heart-pulse-fill"}`}
               style={{ color: "var(--mc-navy)", fontSize: 16 }}
             ></i>
           </div>
@@ -84,7 +95,7 @@ export default function Sidebar() {
                 letterSpacing: "0.05em",
               }}
             >
-              SISTEMA MÉDICO
+              {isAdmin ? "ADMINISTRAÇÃO" : "SISTEMA MÉDICO"}
             </div>
           </div>
         </div>
@@ -175,7 +186,7 @@ export default function Sidebar() {
                 textOverflow: "ellipsis",
               }}
             >
-              {user?.role}
+              {isAdmin ? "Administrador" : "Médico"}
             </div>
           </div>
           <button

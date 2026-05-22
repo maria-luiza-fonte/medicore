@@ -257,7 +257,7 @@ export default function AIAssistant() {
           {
             role: "assistant",
             content:
-              "Para usar uma IA real, configure sua chave da OpenRouter em **Configurações > Integração de IA** ou defina `VITE_OPENROUTER_API_KEY` no ambiente.",
+              "Ops! Encontrei um problema técnico na minha autenticação. Nenhuma resposta pode ser gerada agora. Por favor, aguarde ou contate nosso suporte.",
           },
         ]);
         return;
@@ -363,338 +363,303 @@ export default function AIAssistant() {
         </p>
       </div>
 
-      <div style={{ display: "flex", gap: 20, flex: 1, minHeight: 0 }}>
-        {/* Chat */}
+      {/* Chat Container */}
+      <div
+        className="mc-card"
+        style={{
+          padding: 0,
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+          height: "100%",
+        }}
+      >
+        {/* Context bar */}
         <div
-          className="mc-card"
           style={{
-            flex: 1,
-            padding: 0,
+            padding: "12px 20px",
+            borderBottom: "1px solid var(--mc-border-subtle)",
             display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-          }}
-        >
-          {/* Context bar */}
-          <div
-            style={{
-              padding: "12px 20px",
-              borderBottom: "1px solid var(--mc-border-subtle)",
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-            }}
-          >
-            <i
-              className="bi bi-person-circle"
-              style={{ color: "var(--mc-slate)", fontSize: 16 }}
-            ></i>
-            <select
-              className="mc-input form-select"
-              style={{ maxWidth: 260 }}
-              value={selectedPatient}
-              onChange={(e) => setSelectedPatient(e.target.value)}
-            >
-              <option value="">Consulta geral (sem paciente)</option>
-              {userPatients.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-            {selectedPatient && (
-              <span style={{ fontSize: 12, color: "var(--mc-teal)" }}>
-                <i className="bi bi-check-circle me-1"></i>Contexto do paciente
-                ativo
-              </span>
-            )}
-          </div>
-
-          {/* Messages */}
-          <div className="ai-messages" style={{ flex: 1, overflowY: "auto" }}>
-            {messages.map((m, i) => (
-              <div key={i} className={`ai-msg ${m.role}`}>
-                {m.role === "assistant" && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      marginBottom: 6,
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: 22,
-                        height: 22,
-                        background: "linear-gradient(135deg, #10b981, #059669)",
-                        borderRadius: 6,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <i
-                        className="bi bi-robot"
-                        style={{ color: "white", fontSize: 11 }}
-                      ></i>
-                    </div>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        color: "var(--mc-slate)",
-                        fontWeight: 600,
-                      }}
-                    >
-                      MediCore AI
-                    </span>
-                  </div>
-                )}
-                <div
-                  className="ai-msg-bubble"
-                  dangerouslySetInnerHTML={{ __html: formatMsg(m.content) }}
-                />
-              </div>
-            ))}
-            {loading && (
-              <div className="ai-msg assistant">
-                <div
-                  className="ai-msg-bubble"
-                  style={{ display: "flex", gap: 6, alignItems: "center" }}
-                >
-                  {[0, 1, 2].map((i) => (
-                    <div
-                      key={i}
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: "50%",
-                        background: "var(--mc-teal)",
-                        animation: "pulse 1.4s infinite",
-                        animationDelay: `${i * 0.2}s`,
-                      }}
-                    ></div>
-                  ))}
-                  <span
-                    style={{
-                      fontSize: 12,
-                      color: "var(--mc-slate)",
-                      marginLeft: 4,
-                    }}
-                  >
-                    Analisando...
-                  </span>
-                </div>
-              </div>
-            )}
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div
-            style={{
-              padding: "16px 20px",
-              borderTop: "1px solid var(--mc-border-subtle)",
-            }}
-          >
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <textarea
-                className="mc-input form-control"
-                rows={2}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKey}
-                placeholder="Descreva sintomas, faça perguntas clínicas... (Enter para enviar)"
-                style={{ resize: "none" }}
-                disabled={loading}
-              />
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
-                  className="btn btn-teal"
-                  onClick={() => sendMessage()}
-                  disabled={loading || !input.trim()}
-                  style={{ alignSelf: "flex-end", padding: "10px 16px" }}
-                >
-                  <i className="bi bi-send-fill"></i>
-                </button>
-                <button
-                  className="btn btn-ghost"
-                  onClick={() => setShowSuggestions(!showSuggestions)}
-                  id="ai-suggestions-toggle"
-                  style={{
-                    display: "none",
-                    alignSelf: "flex-end",
-                    padding: "10px 16px",
-                  }}
-                >
-                  <i
-                    className={`bi bi-lightbulb${showSuggestions ? "-fill" : ""}`}
-                  ></i>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Suggestions sidebar - desktop */}
-        <div
-          id="ai-suggestions-desktop"
-          style={{
-            width: 260,
-            display: "flex",
-            flexDirection: "column",
+            alignItems: "center",
             gap: 12,
           }}
         >
-          <div className="mc-card-flat" style={{ padding: "16px" }}>
-            <h6
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.07em",
-                color: "var(--mc-slate)",
-                marginBottom: 12,
-              }}
-            >
-              Perguntas Sugeridas
-            </h6>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {suggestions.map((s, i) => (
-                <button
-                  key={i}
-                  className="btn-ghost btn"
-                  style={{
-                    textAlign: "left",
-                    fontSize: 12,
-                    padding: "8px 12px",
-                    lineHeight: 1.4,
-                  }}
-                  onClick={() => sendMessage(s)}
-                >
-                  <i
-                    className="bi bi-lightbulb me-2"
-                    style={{ color: "#f59e0b" }}
-                  ></i>
-                  {s}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mc-card-flat" style={{ padding: "16px" }}>
-            <h6
-              style={{
-                fontSize: 11,
-                fontWeight: 600,
-                textTransform: "uppercase",
-                letterSpacing: "0.07em",
-                color: "var(--mc-slate)",
-                marginBottom: 10,
-              }}
-            >
-              Aviso Legal
-            </h6>
-            <p
-              style={{
-                fontSize: 11.5,
-                color: "var(--mc-slate)",
-                lineHeight: 1.6,
-              }}
-            >
-              {isVeterinary
-                ? "O MediCore Vet AI é uma ferramenta de apoio à decisão clínica veterinária. As sugestões não substituem o julgamento e a avaliação presencial do médico veterinário responsável."
-                : "O MediCore AI é uma ferramenta de apoio à decisão clínica. As sugestões fornecidas não substituem o julgamento e a avaliação do médico responsável."}
-            </p>
-          </div>
-
-          <button
-            className="btn btn-ghost"
-            onClick={() =>
-              setMessages([
-                {
-                  role: "assistant",
-                  content: "Nova conversa iniciada. Como posso ajudar?",
-                },
-              ])
-            }
-            style={{ fontSize: 12, padding: "8px" }}
+          <i
+            className="bi bi-person-circle"
+            style={{ color: "var(--mc-slate)", fontSize: 16 }}
+          ></i>
+          <select
+            className="mc-input form-select"
+            style={{ maxWidth: 260 }}
+            value={selectedPatient}
+            onChange={(e) => setSelectedPatient(e.target.value)}
           >
-            <i className="bi bi-arrow-clockwise me-2"></i>Nova conversa
-          </button>
+            <option value="">Consulta geral (sem paciente)</option>
+            {userPatients.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+          {selectedPatient && (
+            <span style={{ fontSize: 12, color: "var(--mc-teal)" }}>
+              <i className="bi bi-check-circle me-1"></i>Contexto do paciente
+              ativo
+            </span>
+          )}
         </div>
 
-        {/* Suggestions modal - mobile */}
-        {showSuggestions && (
-          <div
-            className="mc-modal-overlay"
-            onClick={() => setShowSuggestions(false)}
-          >
-            <div
-              className="mc-modal"
-              onClick={(e) => e.stopPropagation()}
-              style={{ maxWidth: "90%", maxHeight: "80vh", overflowY: "auto" }}
-            >
-              <div className="mc-modal-header">
-                <h4
+        {/* Messages */}
+        <div
+          className="ai-messages"
+          style={{ flex: 1, minHeight: 0, overflowY: "auto" }}
+        >
+          {messages.map((m, i) => (
+            <div key={i} className={`ai-msg ${m.role}`}>
+              {m.role === "assistant" && (
+                <div
                   style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: 18,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    marginBottom: 6,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 22,
+                      height: 22,
+                      background: "linear-gradient(135deg, #10b981, #059669)",
+                      borderRadius: 6,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <i
+                      className="bi bi-robot"
+                      style={{ color: "white", fontSize: 11 }}
+                    ></i>
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      color: "var(--mc-slate)",
+                      fontWeight: 600,
+                    }}
+                  >
+                    MediCore AI
+                  </span>
+                </div>
+              )}
+              <div
+                className="ai-msg-bubble"
+                dangerouslySetInnerHTML={{ __html: formatMsg(m.content) }}
+              />
+            </div>
+          ))}
+          {loading && (
+            <div className="ai-msg assistant">
+              <div
+                className="ai-msg-bubble"
+                style={{ display: "flex", gap: 6, alignItems: "center" }}
+              >
+                {[0, 1, 2].map((i) => (
+                  <div
+                    key={i}
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      background: "var(--mc-teal)",
+                      animation: "pulse 1.4s infinite",
+                      animationDelay: `${i * 0.2}s`,
+                    }}
+                  ></div>
+                ))}
+                <span
+                  style={{
+                    fontSize: 12,
+                    color: "var(--mc-slate)",
+                    marginLeft: 4,
+                  }}
+                >
+                  Analisando...
+                </span>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div
+          style={{
+            padding: "16px 20px",
+            borderTop: "1px solid var(--mc-border-subtle)",
+          }}
+        >
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <textarea
+              className="mc-input form-control"
+              rows={2}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKey}
+              placeholder="Descreva sintomas, faça perguntas clínicas... (Enter para enviar)"
+              style={{ resize: "none" }}
+              disabled={loading}
+            />
+            <div style={{ display: "flex", gap: 8 }}>
+              <button
+                className="btn btn-teal"
+                onClick={() => sendMessage()}
+                disabled={loading || !input.trim()}
+                style={{ alignSelf: "flex-end", padding: "10px 16px" }}
+              >
+                <i className="bi bi-send-fill"></i>
+              </button>
+              <button
+                className="btn btn-ghost"
+                onClick={() => setShowSuggestions(!showSuggestions)}
+                style={{ alignSelf: "flex-end", padding: "10px 16px" }}
+                title="Perguntas sugeridas"
+              >
+                <i
+                  className={`bi bi-lightbulb${showSuggestions ? "-fill" : ""}`}
+                ></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Suggestions Modal - sempre disponível */}
+      {showSuggestions && (
+        <div
+          className="mc-modal-overlay"
+          onClick={() => setShowSuggestions(false)}
+        >
+          <div
+            className="mc-modal"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "600px", maxHeight: "85vh", overflowY: "auto" }}
+          >
+            <div className="mc-modal-header">
+              <h4
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-display)",
+                  fontSize: 18,
+                }}
+              >
+                Perguntas Sugeridas
+              </h4>
+              <button
+                className="btn-ghost btn"
+                style={{ padding: "4px 8px" }}
+                onClick={() => setShowSuggestions(false)}
+              >
+                <i className="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <div className="mc-modal-body">
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 10,
+                  marginBottom: 20,
+                }}
+              >
+                {suggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    className="btn-ghost btn"
+                    style={{
+                      textAlign: "left",
+                      fontSize: 13,
+                      padding: "12px 16px",
+                      lineHeight: 1.4,
+                      border: "1px solid var(--mc-border-subtle)",
+                      borderRadius: 8,
+                      transition: "all 0.15s",
+                    }}
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.background = "var(--mc-surface-2)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.background = "transparent")
+                    }
+                    onClick={() => {
+                      sendMessage(s);
+                      setShowSuggestions(false);
+                    }}
+                  >
+                    <i
+                      className="bi bi-lightbulb-fill me-2"
+                      style={{ color: "#f59e0b" }}
+                    ></i>
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+              {/* Aviso Legal */}
+              <div
+                style={{
+                  padding: "12px 16px",
+                  background: "var(--mc-surface-2)",
+                  borderRadius: 8,
+                  marginBottom: 12,
+                }}
+              >
+                <h6
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.07em",
+                    color: "var(--mc-slate)",
+                    marginBottom: 8,
+                  }}
+                >
+                  ⚠️ Aviso Legal
+                </h6>
+                <p
+                  style={{
+                    fontSize: 11,
+                    color: "var(--mc-slate)",
+                    lineHeight: 1.6,
                     margin: 0,
                   }}
                 >
-                  Perguntas Sugeridas
-                </h4>
-                <button
-                  className="btn-ghost btn"
-                  style={{ padding: "4px 8px" }}
-                  onClick={() => setShowSuggestions(false)}
-                >
-                  <i className="bi bi-x-lg"></i>
-                </button>
+                  {isVeterinary
+                    ? "O MediCore Vet AI é uma ferramenta de apoio à decisão clínica veterinária. As sugestões não substituem o julgamento e a avaliação presencial do médico veterinário responsável."
+                    : "O MediCore AI é uma ferramenta de apoio à decisão clínica. As sugestões fornecidas não substituem o julgamento e a avaliação do médico responsável."}
+                </p>
               </div>
-              <div className="mc-modal-body">
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
-                >
-                  {suggestions.map((s, i) => (
-                    <button
-                      key={i}
-                      className="btn-ghost btn"
-                      style={{
-                        textAlign: "left",
-                        fontSize: 13,
-                        padding: "12px 16px",
-                        lineHeight: 1.4,
-                        border: "1px solid var(--mc-border-subtle)",
-                        borderRadius: 8,
-                        transition: "all 0.15s",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.background =
-                          "var(--mc-surface-2)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.background = "transparent")
-                      }
-                      onClick={() => {
-                        sendMessage(s);
-                        setShowSuggestions(false);
-                      }}
-                    >
-                      <i
-                        className="bi bi-lightbulb-fill me-2"
-                        style={{ color: "#f59e0b" }}
-                      ></i>
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
+
+              {/* Nova Conversa */}
+              <button
+                className="btn btn-ghost w-100"
+                onClick={() => {
+                  setMessages([
+                    {
+                      role: "assistant",
+                      content: "Nova conversa iniciada. Como posso ajudar?",
+                    },
+                  ]);
+                  setShowSuggestions(false);
+                }}
+                style={{ fontSize: 12 }}
+              >
+                <i className="bi bi-arrow-clockwise me-2"></i>Nova Conversa
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

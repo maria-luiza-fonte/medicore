@@ -885,35 +885,41 @@ body {
     font-size: 14px;
   }
 
-  /* Hide some elements on mobile */
   .mc-page-subtitle {
-    display: none;
+    font-size: 12px;
   }
 
-  /* AI Assistant mobile layout */
-  #ai-suggestions-desktop {
-    display: none !important;
+  /* Pacientes - Centralizar modal */
+  .mc-modal {
+    width: 95vw !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
   }
-  #ai-suggestions-toggle {
-    display: block !important;
-  }
+}
 
-  /* Dashboard and Reports */
-  .stat-card {
-    flex: 1;
-    min-width: 100px;
-  }
+/* AI Assistant mobile layout */
+#ai-suggestions-desktop {
+  display: none !important;
+}
+#ai-suggestions-toggle {
+  display: block !important;
+}
 
-  /* Ensure flex containers don't leave empty space */
-  div[style*="display: flex"] > div[style*="flex: 1"],
-  div[style*="display: flex"] > [class*="col-"] {
-    min-width: 0;
-  }
+/* Dashboard and Reports */
+.stat-card {
+  flex: 1;
+  min-width: 100px;
+}
 
-  /* Card layouts on mobile */
-  .mc-card {
-    width: 100%;
-  }
+/* Ensure flex containers don't leave empty space */
+div[style*="display: flex"] > div[style*="flex: 1"],
+div[style*="display: flex"] > [class*="col-"] {
+  min-width: 0;
+}
+
+/* Card layouts on mobile */
+.mc-card {
+  width: 100%;
 }
 
 /* Override Bootstrap */

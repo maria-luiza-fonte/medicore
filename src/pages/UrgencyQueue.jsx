@@ -33,7 +33,9 @@ export default function UrgencyQueue() {
     doctor: "",
   });
 
-  const filtered = urgencyQueue.filter((u) => u.doctor === user?.name);
+  const filtered = urgencyQueue.filter(
+    (u) => u.doctor === user?.name && u.status !== "resolved",
+  );
 
   const sorted = [...filtered].sort((a, b) => {
     if (a.status === "waiting" && b.status !== "waiting") return -1;
@@ -346,35 +348,40 @@ export default function UrgencyQueue() {
                       flexShrink: 0,
                     }}
                   >
-                    {u.status === "waiting" ? (
-                      <button
-                        className="btn btn-teal"
-                        style={{
-                          fontSize: 12,
-                          padding: "7px 16px",
-                          whiteSpace: "nowrap",
-                        }}
-                        onClick={() => setScheduleModal(u)}
-                      >
-                        <i className="bi bi-calendar-check me-2"></i>Agendar
-                      </button>
-                    ) : (
+                    {u.status === "waiting" && (
+                      <>
+                        <button
+                          className="btn btn-teal"
+                          style={{
+                            fontSize: 12,
+                            padding: "7px 16px",
+                            whiteSpace: "nowrap",
+                          }}
+                          onClick={() => setScheduleModal(u)}
+                        >
+                          <i className="bi bi-calendar-check me-2"></i>Agendar
+                        </button>
+                        <button
+                          className="btn btn-ghost"
+                          style={{ fontSize: 11, padding: "5px 12px" }}
+                          onClick={() => {
+                            updateUrgency(u.id, { status: "resolved" });
+                            alert("✓ Urgência descartada e removida da fila");
+                          }}
+                          title="Descartar urgência e remover da fila"
+                        >
+                          <i className="bi bi-x-circle me-1"></i>Descartar
+                        </button>
+                      </>
+                    )}
+                    {u.status === "scheduled" && (
                       <span
                         className="mc-badge badge-status-active"
-                        style={{ padding: "6px 12px" }}
+                        style={{ padding: "6px 12px", textAlign: "center" }}
                       >
                         <i className="bi bi-check-circle me-1"></i>Agendado
                       </span>
                     )}
-                    <button
-                      className="btn btn-ghost"
-                      style={{ fontSize: 11, padding: "5px 12px" }}
-                      onClick={() =>
-                        updateUrgency(u.id, { status: "resolved" })
-                      }
-                    >
-                      Resolver
-                    </button>
                   </div>
                 </div>
               </div>
@@ -418,7 +425,7 @@ export default function UrgencyQueue() {
         >
           <div
             className="mc-modal"
-            style={{ maxWidth: 480 }}
+            style={{ maxWidth: "90vw", maxHeight: "85vh", width: 480 }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mc-modal-header">
@@ -439,7 +446,10 @@ export default function UrgencyQueue() {
                 <i className="bi bi-x-lg"></i>
               </button>
             </div>
-            <div className="mc-modal-body">
+            <div
+              className="mc-modal-body"
+              style={{ maxHeight: "70vh", overflowY: "auto" }}
+            >
               <div
                 style={{
                   background: `rgba(${urgencyColors[scheduleModal.level]
@@ -471,10 +481,19 @@ export default function UrgencyQueue() {
                   <input
                     className="mc-input form-control"
                     value={schedForm.doctor || scheduleModal.doctor}
-                    onChange={(e) =>
-                      setSchedForm((p) => ({ ...p, doctor: e.target.value }))
-                    }
+                    disabled
+                    style={{ opacity: 0.7 }}
+                    title="Médico responsável pela consulta original"
                   />
+                  <small
+                    style={{
+                      fontSize: 11,
+                      color: "var(--mc-slate)",
+                      marginTop: 4,
+                    }}
+                  >
+                    Mantém o médico responsável pela urgência
+                  </small>
                 </div>
                 <div className="col-md-7">
                   <label className="mc-label">Data preferencial</label>
@@ -489,14 +508,24 @@ export default function UrgencyQueue() {
                 </div>
                 <div className="col-md-5">
                   <label className="mc-label">Horário</label>
-                  <input
-                    type="time"
-                    className="mc-input form-control"
+                  <select
+                    className="mc-input form-select"
                     value={schedForm.time}
                     onChange={(e) =>
                       setSchedForm((p) => ({ ...p, time: e.target.value }))
                     }
-                  />
+                  >
+                    <option value="">Selecione...</option>
+                    <option value="08:00">08:00</option>
+                    <option value="09:00">09:00</option>
+                    <option value="10:00">10:00</option>
+                    <option value="11:00">11:00</option>
+                    <option value="13:00">13:00</option>
+                    <option value="14:00">14:00</option>
+                    <option value="15:00">15:00</option>
+                    <option value="16:00">16:00</option>
+                    <option value="17:00">17:00</option>
+                  </select>
                 </div>
               </div>
             </div>

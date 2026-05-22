@@ -223,6 +223,86 @@ const INITIAL_URGENCY_QUEUE = [
   },
 ];
 
+const INITIAL_INSURANCES = [
+  { id: 1, name: "Unimed", status: "active" },
+  { id: 2, name: "Bradesco Saúde", status: "active" },
+  { id: 3, name: "SulAmérica", status: "active" },
+  { id: 4, name: "Amil", status: "active" },
+  { id: 5, name: "Particular", status: "active" },
+];
+
+const INITIAL_SYSTEM_USERS = [
+  {
+    id: 1,
+    name: "Dr. Ricardo Mendes",
+    email: "dr.ricardo@medicore.com",
+    role: "doctor",
+    specialty: "Cardiologia",
+    crm: "123456",
+    status: "active",
+    createdAt: "2026-01-01",
+  },
+  {
+    id: 2,
+    name: "Dra. Beatriz Almeida",
+    email: "dra.beatriz@medicore.com",
+    role: "doctor",
+    specialty: "Clínica Geral",
+    crm: "654321",
+    status: "active",
+    createdAt: "2026-01-01",
+  },
+  {
+    id: 3,
+    name: "Dra. Camila Rocha",
+    email: "dra.camila@medicore.com",
+    role: "veterinary",
+    specialty: "Clínica de Pequenos Animais",
+    crmv: "789012",
+    status: "active",
+    createdAt: "2026-01-01",
+  },
+  {
+    id: 4,
+    name: "Admin",
+    email: "admin@medicore.com",
+    role: "admin",
+    status: "active",
+    createdAt: "2026-01-01",
+  },
+];
+
+const INITIAL_SYSTEM_LOGS = [
+  {
+    id: 1,
+    type: "login",
+    user: "Dr. Ricardo Mendes",
+    action: "Login no sistema",
+    timestamp: "2026-05-22T08:30:00",
+  },
+  {
+    id: 2,
+    type: "appointment",
+    user: "Dr. Ricardo Mendes",
+    action: "Consulta cadastrada",
+    timestamp: "2026-05-22T09:15:00",
+  },
+  {
+    id: 3,
+    type: "patient",
+    user: "Dra. Beatriz Almeida",
+    action: "Paciente adicionado",
+    timestamp: "2026-05-22T10:00:00",
+  },
+  {
+    id: 4,
+    type: "urgency",
+    user: "Dr. Ricardo Mendes",
+    action: "Urgência registrada",
+    timestamp: "2026-05-22T11:45:00",
+  },
+];
+
 const THEME_STORAGE_KEY = "mc-theme";
 
 const getSystemTheme = () =>
@@ -244,6 +324,9 @@ export function AppProvider({ children }) {
   const [patients, setPatients] = useState(INITIAL_PATIENTS);
   const [appointments, setAppointments] = useState(INITIAL_APPOINTMENTS);
   const [urgencyQueue, setUrgencyQueue] = useState(INITIAL_URGENCY_QUEUE);
+  const [insurances, setInsurances] = useState(INITIAL_INSURANCES);
+  const [systemUsers, setSystemUsers] = useState(INITIAL_SYSTEM_USERS);
+  const [systemLogs, setSystemLogs] = useState(INITIAL_SYSTEM_LOGS);
   const [activePage, setActivePage] = useState("dashboard");
   const [theme, setThemeState] = useState(getInitialTheme);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -277,18 +360,32 @@ export function AppProvider({ children }) {
 
   const login = (email, password, professionalType = "medical") => {
     if (email && password) {
-      const isVeterinary = professionalType === "veterinary";
-      const doctorId = isVeterinary ? 3 : email.includes("ricardo") ? 1 : 2;
-      setUser({
-        name: isVeterinary ? "Dra. Camila Rocha" : "Dr. Ricardo Mendes",
-        email,
-        role: isVeterinary
-          ? "Médica Veterinária — Clínica de Pequenos Animais"
-          : "Médico — Cardiologia",
-        avatar: isVeterinary ? "CR" : "RM",
-        professionalType,
-        doctorId,
-      });
+      const isAdmin = email.includes("admin");
+      const isVeterinary = professionalType === "veterinary" && !isAdmin;
+
+      if (isAdmin) {
+        setUser({
+          name: "Admin",
+          email,
+          role: "Administrador — Gerenciamento do Sistema",
+          avatar: "AD",
+          professionalType: "admin",
+        });
+        setActivePage("admin");
+      } else {
+        const doctorId = isVeterinary ? 3 : email.includes("ricardo") ? 1 : 2;
+        setUser({
+          name: isVeterinary ? "Dra. Camila Rocha" : "Dr. Ricardo Mendes",
+          email,
+          role: isVeterinary
+            ? "Médica Veterinária — Clínica de Pequenos Animais"
+            : "Médico — Cardiologia",
+          avatar: isVeterinary ? "CR" : "RM",
+          professionalType,
+          doctorId,
+        });
+        setActivePage("dashboard");
+      }
       return true;
     }
     return false;
@@ -376,6 +473,84 @@ export function AppProvider({ children }) {
         .sort((a, b) => a.level - b.level),
     );
 
+  const addSystemUser = (userData) => {
+    const newUser = {
+      ...userData,
+      id: Date.now(),
+      status: "active",
+      createdAt: new Date().toISOString().split("T")[0],
+    };
+    setSystemUsers((prev) => [...prev, newUser]);
+    addSystemLog("user", `Usuário ${userData.name} adicionado`);
+    return newUser;
+  };
+
+  const updateSystemUser = (id, data) => {
+    setSystemUsers((prev) =>
+      prev.map((u) => (u.id === id ? { ...u, ...data } : u)),
+    );
+    const user = systemUsers.find((u) => u.id === id);
+    if (user) {
+      addSystemLog("user", `Usuário ${user.name} atualizado`);
+    }
+  };
+
+  const deleteSystemUser = (id) => {
+    const user = systemUsers.find((u) => u.id === id);
+    setSystemUsers((prev) => prev.filter((u) => u.id !== id));
+    if (user) {
+      addSystemLog("user", `Usuário ${user.name} removido`);
+    }
+  };
+
+  const addSystemLog = (type, action) => {
+    const newLog = {
+      id: Date.now(),
+      type,
+      user: user?.name || "Sistema",
+      action,
+      timestamp: new Date().toISOString(),
+    };
+    setSystemLogs((prev) => [newLog, ...prev]);
+  };
+
+  const addInsurance = (insuranceData) => {
+    const newInsurance = {
+      ...insuranceData,
+      id: Date.now(),
+      status: "active",
+    };
+    setInsurances((prev) => [...prev, newInsurance]);
+    addSystemLog("insurance", `Convênio ${insuranceData.name} adicionado`);
+    return newInsurance;
+  };
+
+  const updateInsurance = (id, data) => {
+    setInsurances((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, ...data } : i)),
+    );
+  };
+
+  const deleteInsurance = (id) => {
+    const insurance = insurances.find((i) => i.id === id);
+    setInsurances((prev) => prev.filter((i) => i.id !== id));
+    if (insurance) {
+      addSystemLog("insurance", `Convênio ${insurance.name} removido`);
+    }
+  };
+
+  const toggleInsuranceStatus = (id) => {
+    const insurance = insurances.find((i) => i.id === id);
+    if (insurance) {
+      const newStatus = insurance.status === "active" ? "inactive" : "active";
+      updateInsurance(id, { status: newStatus });
+      addSystemLog(
+        "insurance",
+        `Convênio ${insurance.name} marcado como ${newStatus === "active" ? "ativo" : "inativo"}`,
+      );
+    }
+  };
+
   const toggleSidebarOpen = () => setSidebarOpen((prev) => !prev);
   const closeSidebar = () => setSidebarOpen(false);
 
@@ -404,6 +579,17 @@ export function AppProvider({ children }) {
         urgencyQueue,
         addUrgency,
         updateUrgency,
+        insurances,
+        addInsurance,
+        updateInsurance,
+        deleteInsurance,
+        toggleInsuranceStatus,
+        systemUsers,
+        addSystemUser,
+        updateSystemUser,
+        deleteSystemUser,
+        systemLogs,
+        addSystemLog,
         activePage,
         setActivePage,
         theme,

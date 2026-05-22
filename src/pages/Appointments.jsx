@@ -128,14 +128,25 @@ export default function Appointments() {
               />
             </div>
           </div>
-          <div className="col-md-4">
-            <div style={{ display: "flex", gap: 8 }}>
+          <div className="col-md-7">
+            <div
+              style={{
+                display: "flex",
+                gap: 8,
+                overflowX: "auto",
+                paddingBottom: 4,
+              }}
+            >
               {["all", "pending", "done", "cancelled"].map((s) => (
                 <button
                   key={s}
                   onClick={() => setFilterStatus(s)}
                   className={`btn ${filterStatus === s ? "btn-teal" : "btn-ghost"}`}
-                  style={{ fontSize: 12, padding: "5px 12px" }}
+                  style={{
+                    fontSize: 12,
+                    padding: "5px 12px",
+                    whiteSpace: "nowrap",
+                  }}
                 >
                   {s === "all" ? "Todas" : statusLabel[s]}
                 </button>
@@ -529,10 +540,21 @@ export default function Appointments() {
                     value={form.specialty}
                     onChange={(e) => f("specialty", e.target.value)}
                   >
+                    <option value="">Selecione...</option>
                     {specialties.map((s) => (
                       <option key={s}>{s}</option>
                     ))}
                   </select>
+                  <small
+                    style={{
+                      fontSize: 11,
+                      color: "var(--mc-slate)",
+                      marginTop: 4,
+                      display: "block",
+                    }}
+                  >
+                    Especialidade deve ser compatível com o médico
+                  </small>
                 </div>
                 <div className="col-md-6">
                   <label className="mc-label">Data</label>
