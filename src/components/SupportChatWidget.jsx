@@ -126,7 +126,7 @@ export default function SupportChatWidget() {
         <section className="support-chat-panel" aria-label="Chat de suporte">
           <header className="support-chat-header">
             <div>
-              <strong>Suporte IA</strong>
+              <strong>IA de Atendimento</strong>
               <small className="support-chat-status">local</small>
             </div>
           </header>
