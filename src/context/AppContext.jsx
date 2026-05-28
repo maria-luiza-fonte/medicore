@@ -304,6 +304,7 @@ const INITIAL_SYSTEM_LOGS = [
 ];
 
 const THEME_STORAGE_KEY = "mc-theme";
+const COMPACT_MODE_STORAGE_KEY = "mc-compact-mode";
 
 const getSystemTheme = () =>
   window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -319,6 +320,11 @@ const getEffectiveTheme = (theme) => {
   return theme === "auto" ? getSystemTheme() : theme;
 };
 
+const getInitialCompactMode = () => {
+  const savedCompactMode = localStorage.getItem(COMPACT_MODE_STORAGE_KEY);
+  return savedCompactMode === "true";
+};
+
 export function AppProvider({ children }) {
   const [user, setUser] = useState(null);
   const [patients, setPatients] = useState(INITIAL_PATIENTS);
@@ -329,6 +335,7 @@ export function AppProvider({ children }) {
   const [systemLogs, setSystemLogs] = useState(INITIAL_SYSTEM_LOGS);
   const [activePage, setActivePage] = useState("dashboard");
   const [theme, setThemeState] = useState(getInitialTheme);
+  const [compactMode, setCompactMode] = useState(getInitialCompactMode);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogin, setShowLogin] = useState(true);
   const [showHome, setShowHome] = useState(true);
@@ -558,6 +565,22 @@ export function AppProvider({ children }) {
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
+  const setCompactModeValue = (value) => {
+    setCompactMode(Boolean(value));
+    localStorage.setItem(COMPACT_MODE_STORAGE_KEY, String(Boolean(value)));
+  };
+
+  const toggleCompactMode = () => {
+    setCompactModeValue(!compactMode);
+  };
+
+  useEffect(() => {
+    document.documentElement.setAttribute(
+      "data-compact-mode",
+      compactMode ? "true" : "false",
+    );
+  }, [compactMode]);
+
   return (
     <AppContext.Provider
       value={{
@@ -595,6 +618,9 @@ export function AppProvider({ children }) {
         theme,
         setTheme,
         toggleTheme,
+        compactMode,
+        setCompactMode: setCompactModeValue,
+        toggleCompactMode,
         sidebarOpen,
         toggleSidebarOpen,
         closeSidebar,

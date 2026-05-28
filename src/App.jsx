@@ -14,6 +14,7 @@ import Records from "./pages/Records";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import Admin from "./pages/Admin";
+import SupportChatWidget from "./components/SupportChatWidget";
 
 function AppContent() {
   const { user, activePage, sidebarOpen, closeSidebar, showHome, showLogin } =
@@ -54,6 +55,7 @@ export default function App() {
   return (
     <AppProvider>
       <AppContent />
+      <SupportChatWidget />
     </AppProvider>
   );
 }

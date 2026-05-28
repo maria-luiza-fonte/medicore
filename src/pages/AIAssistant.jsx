@@ -62,7 +62,7 @@ const VETERINARY_SUGGESTIONS = [
 ];
 
 export default function AIAssistant() {
-  const { user, patients } = useApp();
+  const { user, patients, compactMode } = useApp();
   const isVeterinary = user?.professionalType === "veterinary";
   const userPatients = patients.filter((p) => p.doctorId === user?.doctorId);
   const scopeInstruction = isVeterinary
@@ -87,6 +87,9 @@ export default function AIAssistant() {
   const [selectedPatient, setSelectedPatient] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const COMPACT_CONTEXT_THRESHOLD = 12;
+  const COMPACT_RECENT_MESSAGES = 8;
 
   const storedApiKey = localStorage.getItem(OPENROUTER_KEY_STORAGE) || "";
   const envApiKey = import.meta.env.VITE_OPENROUTER_API_KEY || "";
@@ -230,6 +233,43 @@ export default function AIAssistant() {
     return html;
   };
 
+  const createCompactContext = (conversationMessages) => {
+    if (
+      !compactMode ||
+      conversationMessages.length <= COMPACT_CONTEXT_THRESHOLD
+    ) {
+      return null;
+    }
+
+    const olderMessages = conversationMessages.slice(
+      0,
+      conversationMessages.length - COMPACT_RECENT_MESSAGES,
+    );
+
+    if (!olderMessages.length) {
+      return null;
+    }
+
+    const preview = olderMessages
+      .map((message) => {
+        const label = message.role === "user" ? "Profissional" : "IA";
+        const rawContent = String(message.content || "")
+          .replace(/\s+/g, " ")
+          .trim();
+        const content = rawContent.replace(/\s+/g, " ").slice(0, 140);
+        const wasTruncated = rawContent.length > 140;
+
+        return `${label}: ${content}${wasTruncated ? "..." : ""}`;
+      })
+      .join(" | ");
+
+    return [
+      "[Resumo compacto automático da conversa anterior]",
+      "Use este histórico resumido apenas como contexto para continuidade da conversa.",
+      preview,
+    ].join("\n");
+  };
+
   const sendMessage = async (msg) => {
     const text = msg || input.trim();
     if (!text || loading) return;
@@ -257,19 +297,35 @@ export default function AIAssistant() {
           {
             role: "assistant",
             content:
-              "Ops! Encontrei um problema técnico na minha autenticação. Nenhuma resposta pode ser gerada agora. Por favor, aguarde ou contate nosso suporte.",
+              "Ops! Encontrei um problema técnico em minha autenticação. Nenhuma resposta pode ser gerada agora. Por favor, aguarde ou contate nosso suporte.",
           },
         ]);
         return;
       }
 
+      const compactContext = createCompactContext(newMessages);
+
       const apiMessages = [
         { role: "system", content: systemPrompt },
-        ...newMessages.map((m) => ({
-          role: m.role,
-          content:
-            m.role === "user" && m.content === text ? scopedMsg : m.content,
-        })),
+        ...(compactContext
+          ? [
+              {
+                role: "system",
+                content: compactContext,
+              },
+            ]
+          : []),
+        ...newMessages
+          .slice(
+            compactMode && newMessages.length > COMPACT_CONTEXT_THRESHOLD
+              ? -COMPACT_RECENT_MESSAGES
+              : 0,
+          )
+          .map((m) => ({
+            role: m.role,
+            content:
+              m.role === "user" && m.content === text ? scopedMsg : m.content,
+          })),
       ];
 
       const response = await fetch(

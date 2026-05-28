@@ -10,7 +10,7 @@ const defaultSettings = {
 };
 
 export default function Settings() {
-  const { theme, setTheme, user } = useApp();
+  const { theme, setTheme, user, compactMode, setCompactMode } = useApp();
   const [settings, setSettings] = useState(defaultSettings);
 
   useEffect(() => {
@@ -20,6 +20,9 @@ export default function Settings() {
     try {
       const parsed = JSON.parse(raw);
       setSettings((prev) => ({ ...prev, ...parsed }));
+      if (typeof parsed.compactMode === "boolean") {
+        setCompactMode(parsed.compactMode);
+      }
     } catch {
       setSettings(defaultSettings);
     }
@@ -30,7 +33,15 @@ export default function Settings() {
   }, [settings]);
 
   const updateSetting = (key) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+    setSettings((prev) => {
+      const nextValue = !prev[key];
+
+      if (key === "compactMode") {
+        setCompactMode(nextValue);
+      }
+
+      return { ...prev, [key]: nextValue };
+    });
   };
 
   return (
@@ -125,14 +136,27 @@ export default function Settings() {
                 className="d-flex justify-content-between align-items-center"
                 style={{ color: "var(--mc-text)" }}
               >
-                <span style={{ fontSize: 14 }}>Modo compacto</span>
+                <span style={{ fontSize: 14 }}>
+                  Compactar conversa longa da IA
+                </span>
                 <input
                   type="checkbox"
-                  checked={settings.compactMode}
+                  checked={compactMode}
                   onChange={() => updateSetting("compactMode")}
                   style={{ accentColor: "var(--mc-teal)" }}
                 />
               </label>
+
+              <div
+                style={{
+                  color: "var(--mc-slate)",
+                  fontSize: 12,
+                  marginTop: -6,
+                }}
+              >
+                Ao ativar, o sistema resume partes antigas do chat da IA para
+                reduzir contexto e consumo de tokens.
+              </div>
 
               <label
                 className="d-flex justify-content-between align-items-center"
