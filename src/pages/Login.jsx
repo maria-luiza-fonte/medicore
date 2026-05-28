@@ -5,6 +5,7 @@ export default function Login() {
   const { login, setShowLogin, setShowHome } = useApp();
   const [email, setEmail] = useState("dr.ricardo@medicore.com");
   const [password, setPassword] = useState("senha123");
+  const [showPassword, setShowPassword] = useState(false);
   const [professionalType, setProfessionalType] = useState("medical");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -171,14 +172,34 @@ export default function Login() {
                   }}
                 ></i>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className="mc-input form-control"
-                  style={{ paddingLeft: 36 }}
+                  style={{ paddingLeft: 36, paddingRight: 40 }}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "8px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    padding: "4px 8px",
+                    fontSize: 16,
+                    border: "none",
+                    background: "none",
+                    color: "var(--mc-slate)",
+                    cursor: "pointer",
+                  }}
+                >
+                  <i
+                    className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}
+                  ></i>
+                </button>
               </div>
             </div>
 

@@ -10,6 +10,7 @@ const titles = {
   ai: "Assistente IA",
   reports: "Relatórios",
   settings: "Configurações",
+  admin: "Painel Administrativo",
 };
 
 export default function Topbar() {

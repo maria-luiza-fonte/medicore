@@ -779,6 +779,42 @@ body {
   background: #64748b;
 }
 
+/* Desktop adjustments */
+@media (min-width: 769px) {
+  /* Admin desktop - show labels and tables */
+  .admin-tab-label {
+    display: inline !important;
+  }
+
+  .admin-tab-btn {
+    padding: 14px 20px !important;
+    flex: 0 0 auto;
+    min-width: auto !important;
+  }
+
+  .admin-tab-btn i {
+    margin-right: 8px !important;
+  }
+
+  .admin-table {
+    display: block !important;
+  }
+
+  .admin-cards {
+    display: none !important;
+  }
+
+  .admin-overview .col-lg-3 {
+    max-width: 25% !important;
+    flex-basis: 25% !important;
+  }
+
+  .admin-overview .col-6 {
+    max-width: 25% !important;
+    flex-basis: 25% !important;
+  }
+}
+
 /* Responsive */
 .sidebar-overlay {
   display: none;
@@ -894,6 +930,71 @@ body {
     width: 95vw !important;
     margin-left: auto !important;
     margin-right: auto !important;
+  }
+
+  /* Admin Panel - Tabs mobile */
+  .mc-card .mc-card > [style*="display: flex"] > [style*="borderBottom"] {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+  }
+
+  /* Admin tabs - show only icons on mobile */
+  .admin-tab-label {
+    display: none;
+  }
+
+  .admin-tab-btn {
+    padding: 12px 10px !important;
+    min-width: fit-content !important;
+  }
+
+  .admin-tab-btn i {
+    margin-right: 0 !important;
+  }
+
+  /* Admin Panel - Tables to cards */
+  .admin-table {
+    display: none !important;
+  }
+
+  .admin-cards {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Admin Overview stats */
+  .admin-overview {
+    gap: 12px !important;
+  }
+
+  .admin-overview .col-lg-3,
+  .admin-overview .col-6 {
+    max-width: 100% !important;
+    flex-basis: 100% !important;
+  }
+
+  .stat-card {
+    padding: 12px;
+  }
+
+  .stat-value {
+    font-size: 20px !important;
+  }
+
+  .stat-label {
+    font-size: 11px !important;
+  }
+
+  .stat-icon {
+    font-size: 20px !important;
+  }
+
+  /* Admin cards layout */
+  .admin-cards {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
   }
 }
 

@@ -14,11 +14,19 @@ export default function Admin() {
     toggleInsuranceStatus,
     appointments,
     patients,
+    user,
   } = useApp();
+
+  // Verificar se o usuário atual é admin
+  const currentUserAdmin = systemUsers.find(
+    (u) => u.name === user?.name || u.id === user?.id,
+  );
+  const isCurrentUserAdmin = currentUserAdmin?.role === "admin";
 
   const [activeTab, setActiveTab] = useState("overview");
   const [showUserModal, setShowUserModal] = useState(false);
   const [showInsuranceModal, setShowInsuranceModal] = useState(false);
+  const [showPasswordUser, setShowPasswordUser] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [editingDoctor, setEditingDoctor] = useState(null);
   const [showEditDoctorModal, setShowEditDoctorModal] = useState(false);
@@ -53,6 +61,12 @@ export default function Admin() {
   }).length;
 
   const handleAddUser = () => {
+    // Validação: apenas admins podem criar admins
+    if (newUser.role === "admin" && !isCurrentUserAdmin) {
+      alert("Apenas administradores podem criar outros administradores");
+      return;
+    }
+
     if (newUser.name && newUser.email) {
       addSystemUser(newUser);
       setNewUser({
@@ -119,10 +133,12 @@ export default function Admin() {
       {/* Tabs */}
       <div className="mc-card mb-4" style={{ padding: 0, overflow: "hidden" }}>
         <div
+          className="admin-tabs"
           style={{
             display: "flex",
             borderBottom: "1px solid var(--mc-surface-3)",
             overflowX: "auto",
+            WebkitOverflowScrolling: "touch",
           }}
         >
           {[
@@ -141,8 +157,10 @@ export default function Admin() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
+              className="admin-tab-btn"
               style={{
-                flex: 1,
+                flex: "0 0 auto",
+                minWidth: "fit-content",
                 padding: "14px 20px",
                 border: "none",
                 background: "none",
@@ -157,7 +175,7 @@ export default function Admin() {
               }}
             >
               <i className={`bi ${tab.icon} me-2`}></i>
-              {tab.label}
+              <span className="admin-tab-label">{tab.label}</span>
             </button>
           ))}
         </div>
@@ -166,7 +184,7 @@ export default function Admin() {
       {/* Overview Tab */}
       {activeTab === "overview" && (
         <div>
-          <div className="row g-3 mb-4">
+          <div className="row g-3 mb-4 admin-overview">
             {[
               {
                 label: "Usuários Totais",
@@ -375,6 +393,42 @@ export default function Admin() {
                   />
                 </div>
                 <div className="col-md-6">
+                  <label className="mc-label">Senha</label>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPasswordUser ? "text" : "password"}
+                      className="mc-input form-control"
+                      value={newUser.password || ""}
+                      onChange={(e) =>
+                        setNewUser({ ...newUser, password: e.target.value })
+                      }
+                      placeholder="Crie uma senha"
+                      style={{ paddingRight: "40px" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswordUser(!showPasswordUser)}
+                      style={{
+                        position: "absolute",
+                        right: "8px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        padding: "4px 8px",
+                        fontSize: 16,
+                        zIndex: 10,
+                        border: "none",
+                        background: "none",
+                        color: "var(--mc-slate)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <i
+                        className={`bi ${showPasswordUser ? "bi-eye-slash" : "bi-eye"}`}
+                      ></i>
+                    </button>
+                  </div>
+                </div>
+                <div className="col-md-6">
                   <label className="mc-label">Perfil</label>
                   <select
                     className="mc-input form-select"
@@ -385,8 +439,14 @@ export default function Admin() {
                   >
                     <option value="doctor">Médico</option>
                     <option value="veterinary">Médico Veterinário</option>
-                    <option value="admin">Admin</option>
+                    {isCurrentUserAdmin && <option value="admin">Admin</option>}
                   </select>
+                  {!isCurrentUserAdmin && newUser.role === "admin" && (
+                    <p style={{ fontSize: 11, color: "#ef4444", marginTop: 4 }}>
+                      <i className="bi bi-exclamation-circle me-1"></i>
+                      Apenas administradores podem criar admins
+                    </p>
+                  )}
                 </div>
                 {(newUser.role === "doctor" ||
                   newUser.role === "veterinary") && (
@@ -457,7 +517,7 @@ export default function Admin() {
           )}
 
           <div
-            className="mc-card"
+            className="mc-card admin-table"
             style={{ padding: "20px 24px", overflowX: "auto" }}
           >
             <table
@@ -610,6 +670,94 @@ export default function Admin() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile cards view */}
+          <div className="admin-cards row g-3">
+            {systemUsers.map((user) => (
+              <div key={user.id} className="col-12">
+                <div className="mc-card" style={{ padding: "16px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                      marginBottom: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        background: "var(--mc-teal-surface)",
+                        borderRadius: 8,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "var(--mc-teal)",
+                        flexShrink: 0,
+                      }}
+                    >
+                      {user.name
+                        .split(" ")
+                        .slice(0, 2)
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        style={{
+                          fontSize: 13,
+                          fontWeight: 600,
+                          color: "var(--mc-text)",
+                          marginBottom: 2,
+                        }}
+                      >
+                        {user.name}
+                      </div>
+                      <div style={{ fontSize: 11, color: "var(--mc-slate)" }}>
+                        {user.email}
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      paddingTop: 12,
+                      borderTop: "1px solid var(--mc-surface-3)",
+                    }}
+                  >
+                    <span
+                      style={{
+                        padding: "4px 8px",
+                        borderRadius: 4,
+                        background:
+                          user.role === "admin"
+                            ? "rgba(245, 158, 11, 0.1)"
+                            : "rgba(167, 139, 250, 0.1)",
+                        color: user.role === "admin" ? "#f59e0b" : "#a78bfa",
+                        fontSize: 11,
+                        fontWeight: 600,
+                      }}
+                    >
+                      {user.role === "admin" ? "Admin" : "Médico"}
+                    </span>
+                    <button
+                      className="btn btn-ghost"
+                      style={{ fontSize: 12, padding: "4px 8px" }}
+                      onClick={() => handleDeleteUser(user.id)}
+                    >
+                      <i className="bi bi-trash"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -863,80 +1011,154 @@ export default function Admin() {
               </p>
             </div>
           ) : (
-            <div
-              className="mc-card"
-              style={{ padding: "16px", overflow: "auto" }}
-            >
-              <table
-                style={{
-                  width: "100%",
-                  fontSize: 13,
-                  borderCollapse: "collapse",
-                }}
+            <>
+              <div
+                className="mc-card admin-table"
+                style={{ padding: "16px", overflow: "auto" }}
               >
-                <thead>
-                  <tr
-                    style={{
-                      borderBottom: "1px solid var(--mc-border-subtle)",
-                    }}
-                  >
-                    <th
-                      style={{
-                        padding: "12px",
-                        textAlign: "left",
-                        fontWeight: 600,
-                        color: "var(--mc-slate)",
-                      }}
-                    >
-                      Data
-                    </th>
-                    <th
-                      style={{
-                        padding: "12px",
-                        textAlign: "left",
-                        fontWeight: 600,
-                        color: "var(--mc-slate)",
-                      }}
-                    >
-                      Paciente
-                    </th>
-                    <th
-                      style={{
-                        padding: "12px",
-                        textAlign: "left",
-                        fontWeight: 600,
-                        color: "var(--mc-slate)",
-                      }}
-                    >
-                      Médico
-                    </th>
-                    <th
-                      style={{
-                        padding: "12px",
-                        textAlign: "left",
-                        fontWeight: 600,
-                        color: "var(--mc-slate)",
-                      }}
-                    >
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.map((apt) => (
+                <table
+                  style={{
+                    width: "100%",
+                    fontSize: 13,
+                    borderCollapse: "collapse",
+                  }}
+                >
+                  <thead>
                     <tr
-                      key={apt.id}
                       style={{
                         borderBottom: "1px solid var(--mc-border-subtle)",
                       }}
                     >
-                      <td style={{ padding: "12px" }}>
-                        {new Date(apt.date).toLocaleDateString("pt-BR")}{" "}
-                        {apt.time}
-                      </td>
-                      <td style={{ padding: "12px" }}>{apt.patientName}</td>
-                      <td style={{ padding: "12px" }}>{apt.doctor}</td>
-                      <td style={{ padding: "12px" }}>
+                      <th
+                        style={{
+                          padding: "12px",
+                          textAlign: "left",
+                          fontWeight: 600,
+                          color: "var(--mc-slate)",
+                        }}
+                      >
+                        Data
+                      </th>
+                      <th
+                        style={{
+                          padding: "12px",
+                          textAlign: "left",
+                          fontWeight: 600,
+                          color: "var(--mc-slate)",
+                        }}
+                      >
+                        Paciente
+                      </th>
+                      <th
+                        style={{
+                          padding: "12px",
+                          textAlign: "left",
+                          fontWeight: 600,
+                          color: "var(--mc-slate)",
+                        }}
+                      >
+                        Médico
+                      </th>
+                      <th
+                        style={{
+                          padding: "12px",
+                          textAlign: "left",
+                          fontWeight: 600,
+                          color: "var(--mc-slate)",
+                        }}
+                      >
+                        Status
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {appointments.map((apt) => (
+                      <tr
+                        key={apt.id}
+                        style={{
+                          borderBottom: "1px solid var(--mc-border-subtle)",
+                        }}
+                      >
+                        <td style={{ padding: "12px" }}>
+                          {new Date(apt.date).toLocaleDateString("pt-BR")}{" "}
+                          {apt.time}
+                        </td>
+                        <td style={{ padding: "12px" }}>{apt.patientName}</td>
+                        <td style={{ padding: "12px" }}>{apt.doctor}</td>
+                        <td style={{ padding: "12px" }}>
+                          <span
+                            style={{
+                              background:
+                                apt.status === "completed"
+                                  ? "#10b98126"
+                                  : "#f59e0b26",
+                              color:
+                                apt.status === "completed"
+                                  ? "#10b981"
+                                  : "#f59e0b",
+                              padding: "4px 8px",
+                              borderRadius: 4,
+                              fontSize: 11,
+                              fontWeight: 600,
+                            }}
+                          >
+                            {apt.status === "completed"
+                              ? "Realizado"
+                              : "Agendado"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile cards view */}
+              <div className="admin-cards row g-3">
+                {appointments.map((apt) => (
+                  <div key={apt.id} className="col-12">
+                    <div className="mc-card" style={{ padding: "16px" }}>
+                      <div style={{ marginBottom: 12 }}>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: "var(--mc-text)",
+                            marginBottom: 4,
+                          }}
+                        >
+                          <i className="bi bi-calendar-event me-2"></i>
+                          {new Date(apt.date).toLocaleDateString(
+                            "pt-BR",
+                          )} às {apt.time}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "var(--mc-slate)",
+                            marginBottom: 4,
+                          }}
+                        >
+                          <i className="bi bi-person me-2"></i>
+                          <strong>Paciente:</strong> {apt.patientName}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: "var(--mc-slate)",
+                            marginBottom: 4,
+                          }}
+                        >
+                          <i className="bi bi-stethoscope me-2"></i>
+                          <strong>Médico:</strong> {apt.doctor}
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          paddingTop: 12,
+                          borderTop: "1px solid var(--mc-surface-3)",
+                        }}
+                      >
                         <span
                           style={{
                             background:
@@ -947,22 +1169,22 @@ export default function Admin() {
                               apt.status === "completed"
                                 ? "#10b981"
                                 : "#f59e0b",
-                            padding: "4px 8px",
+                            padding: "6px 12px",
                             borderRadius: 4,
-                            fontSize: 11,
+                            fontSize: 12,
                             fontWeight: 600,
                           }}
                         >
                           {apt.status === "completed"
-                            ? "Realizado"
-                            : "Agendado"}
+                            ? "✓ Realizado"
+                            : "⧐ Agendado"}
                         </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
       )}
@@ -1408,7 +1630,7 @@ export default function Admin() {
               <i className="bi bi-clock-history me-2"></i>Logs do Sistema
               (últimos 50)
             </h5>
-            <div style={{ overflowX: "auto" }}>
+            <div style={{ overflowX: "auto" }} className="admin-table">
               <table
                 style={{
                   width: "100%",
@@ -1496,6 +1718,56 @@ export default function Admin() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            {/* Mobile cards view */}
+            <div className="admin-cards">
+              {systemLogs.slice(0, 50).map((log) => (
+                <div
+                  key={log.id}
+                  className="mc-card"
+                  style={{ padding: "16px", marginBottom: "12px" }}
+                >
+                  <div style={{ marginBottom: 12 }}>
+                    <span
+                      style={{
+                        padding: "3px 8px",
+                        borderRadius: 4,
+                        background: "rgba(167, 139, 250, 0.1)",
+                        color: "#a78bfa",
+                        fontSize: 11,
+                        fontWeight: 600,
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {log.type}
+                    </span>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 13,
+                      fontWeight: 600,
+                      color: "var(--mc-text)",
+                      marginBottom: 8,
+                    }}
+                  >
+                    <strong>Usuário:</strong> {log.user}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 12,
+                      color: "var(--mc-slate)",
+                      marginBottom: 8,
+                    }}
+                  >
+                    <strong>Ação:</strong> {log.action}
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--mc-slate)" }}>
+                    <strong>Data/Hora:</strong>{" "}
+                    {new Date(log.timestamp).toLocaleString("pt-BR")}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
