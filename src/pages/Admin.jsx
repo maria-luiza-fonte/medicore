@@ -45,7 +45,9 @@ export default function Admin() {
   });
   const [newInsurance, setNewInsurance] = useState({ name: "" });
 
-  const doctors = systemUsers.filter((u) => u.role === "doctor");
+  const doctors = systemUsers.filter(
+    (u) => u.role === "doctor" || u.role === "veterinary",
+  );
   const admins = systemUsers.filter((u) => u.role === "admin");
 
   const totalAppointments = appointments.length;
