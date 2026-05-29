@@ -371,17 +371,25 @@ export function AppProvider({ children }) {
       const isVeterinary = professionalType === "veterinary" && !isAdmin;
 
       if (isAdmin) {
-        setUser({
+        const userData = {
           name: "Admin",
           email,
           role: "Administrador — Gerenciamento do Sistema",
           avatar: "AD",
           professionalType: "admin",
-        });
+        };
+        setUser(userData);
+        localStorage.setItem(
+          "mc-chat-user",
+          JSON.stringify({
+            userId: `admin:${email}`,
+            userName: userData.name,
+          }),
+        );
         setActivePage("admin");
       } else {
         const doctorId = isVeterinary ? 3 : email.includes("ricardo") ? 1 : 2;
-        setUser({
+        const userData = {
           name: isVeterinary ? "Dra. Camila Rocha" : "Dr. Ricardo Mendes",
           email,
           role: isVeterinary
@@ -390,7 +398,15 @@ export function AppProvider({ children }) {
           avatar: isVeterinary ? "CR" : "RM",
           professionalType,
           doctorId,
-        });
+        };
+        setUser(userData);
+        localStorage.setItem(
+          "mc-chat-user",
+          JSON.stringify({
+            userId: `doctor:${email}`,
+            userName: userData.name,
+          }),
+        );
         setActivePage("dashboard");
       }
       return true;
@@ -402,6 +418,7 @@ export function AppProvider({ children }) {
     setUser(null);
     setActivePage("dashboard");
     setShowLogin(true);
+    localStorage.removeItem("mc-chat-user");
   };
 
   const register = (name, email, password, professionalType, crm) => {
