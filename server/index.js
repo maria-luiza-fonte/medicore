@@ -21,6 +21,68 @@ app.get("/health", (_req, res) => {
   });
 });
 
+// Rota de chat com Groq (IA privada no backend)
+app.post("/ai/chat", async (req, res) => {
+  try {
+    const { messages, temperature = 0.2 } = req.body;
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({
+        error: "Messages array is required and must not be empty",
+      });
+    }
+
+    const groqApiKey = process.env.GROQ_API_KEY;
+    const groqModel = process.env.GROQ_MODEL || "llama-3.1-70b-versatile";
+
+    if (!groqApiKey) {
+      console.error("GROQ_API_KEY not configured");
+      return res.status(500).json({
+        error: "AI service not properly configured",
+      });
+    }
+
+    const response = await fetch(
+      "https://api.groq.com/openai/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${groqApiKey}`,
+        },
+        body: JSON.stringify({
+          model: groqModel,
+          messages,
+          temperature,
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage =
+        errorData?.error?.message || `Groq API error (${response.status})`;
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    const reply =
+      data?.choices?.[0]?.message?.content ||
+      "Desculpe, não consegui processar sua mensagem.";
+
+    res.json({
+      role: "assistant",
+      content: reply,
+    });
+  } catch (err) {
+    console.error("AI chat error:", err);
+    res.status(500).json({
+      error:
+        "Houve um problema ao processar sua solicitação. Por favor, tente novamente mais tarde.",
+    });
+  }
+});
+
 const io = new Server(server, {
   cors: {
     origin: CLIENT_ORIGIN,

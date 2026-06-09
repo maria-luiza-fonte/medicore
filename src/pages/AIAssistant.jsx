@@ -1,10 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useApp } from "../context/AppContext";
 
-const OPENROUTER_KEY_STORAGE = "mc-openrouter-api-key";
-const OPENROUTER_MODEL_STORAGE = "mc-openrouter-model";
-const DEFAULT_MODEL = "openai/gpt-4o-mini";
-
 const MEDICAL_SYSTEM_PROMPT = `Você é o MediCore AI, um assistente médico inteligente integrado ao sistema de consultório MediCore. 
 Você auxilia médicos com:
 - Análise de sintomas e possíveis diagnósticos diferenciais
@@ -90,14 +86,6 @@ export default function AIAssistant() {
 
   const COMPACT_CONTEXT_THRESHOLD = 12;
   const COMPACT_RECENT_MESSAGES = 8;
-
-  const storedApiKey = localStorage.getItem(OPENROUTER_KEY_STORAGE) || "";
-  const envApiKey = import.meta.env.VITE_OPENROUTER_API_KEY || "";
-  const apiKey = storedApiKey || envApiKey;
-  const model =
-    localStorage.getItem(OPENROUTER_MODEL_STORAGE) ||
-    import.meta.env.VITE_OPENROUTER_MODEL ||
-    DEFAULT_MODEL;
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -291,18 +279,6 @@ export default function AIAssistant() {
     setLoading(true);
 
     try {
-      if (!apiKey) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content:
-              "Ops! Encontrei um problema técnico em minha autenticação. Nenhuma resposta pode ser gerada agora. Por favor, aguarde ou contate nosso suporte.",
-          },
-        ]);
-        return;
-      }
-
       const compactContext = createCompactContext(newMessages);
 
       const apiMessages = [
@@ -328,23 +304,16 @@ export default function AIAssistant() {
           })),
       ];
 
-      const response = await fetch(
-        "https://openrouter.ai/api/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
-            "HTTP-Referer": window.location.origin,
-            "X-Title": "MediCore",
-          },
-          body: JSON.stringify({
-            model,
-            messages: apiMessages,
-            temperature: 0.2,
-          }),
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
+        body: JSON.stringify({
+          messages: apiMessages,
+          temperature: 0.2,
+        }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -356,15 +325,15 @@ export default function AIAssistant() {
 
       const data = await response.json();
       const reply =
-        data?.choices?.[0]?.message?.content ||
-        "Desculpe, não consegui processar sua mensagem.";
+        data?.content || "Desculpe, não consegui processar sua mensagem.";
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content: `Erro ao conectar com o serviço de IA: ${err.message}`,
+          content:
+            "Houve um problema ao processar sua solicitação. Por favor, tente novamente mais tarde.",
         },
       ]);
     } finally {

@@ -3,8 +3,8 @@ import { useApp } from "../context/AppContext";
 
 export default function Login() {
   const { login, setShowLogin, setShowHome } = useApp();
-  const [email, setEmail] = useState("dr.ricardo@medicore.com");
-  const [password, setPassword] = useState("senha123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [professionalType, setProfessionalType] = useState("medical");
   const [error, setError] = useState("");
@@ -12,13 +12,7 @@ export default function Login() {
 
   const handleProfessionalTypeChange = (type) => {
     setProfessionalType(type);
-    if (type === "admin") {
-      setEmail("admin@medicore.com");
-    } else if (type === "veterinary") {
-      setEmail("dra.camila@medicorevet.com");
-    } else {
-      setEmail("dr.ricardo@medicore.com");
-    }
+    setEmail("");
   };
 
   const handleSubmit = async (e) => {
