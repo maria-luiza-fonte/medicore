@@ -1,4 +1,5 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import http from "http";
 import cors from "cors";
@@ -22,6 +23,38 @@ const getUserFromToken = async (req) => {
 
   return data.user;
 };
+
+const requireRole = (allowedRoles) => {
+  return async (req, res, next) => {
+    const user = await getUserFromToken(req);
+
+    if (!user) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+
+    const { data: roleData } = await supabase
+      .from("user_role")
+      .select("role")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const role = roleData?.role;
+
+    if (!role) {
+      return res.status(403).json({ error: "No role assigned" });
+    }
+
+    if (!allowedRoles.includes(role)) {
+      return res.status(403).json({ error: "Forbidden" });
+    }
+
+    req.user = user;
+    req.role = role;
+
+    next();
+  };
+};
+
 const app = express();
 const server = http.createServer(app);
 
@@ -65,20 +98,21 @@ app.post("/ai/chat", async (req, res) => {
     const { messages, temperature = 0.2 } = req.body;
 
     if (!Array.isArray(messages) || messages.length === 0) {
-      return res.status(400).json({
-        error: "Messages array is required and must not be empty",
-      });
+      return res.status(400).json({ error: "Messages inválidas" });
     }
 
     const groqApiKey = process.env.GROQ_API_KEY;
-    const groqModel = process.env.GROQ_MODEL || "llama-3.1-70b-versatile";
-
     if (!groqApiKey) {
-      console.error("GROQ_API_KEY not configured");
-      return res.status(500).json({
-        error: "AI service not properly configured",
-      });
+      console.log("GROQ KEY EXISTS:", !!process.env.GROQ_API_KEY);
+      return res.status(500).json({ error: "Sem GROQ_API_KEY" });
     }
+
+    const cleanedMessages = messages
+      .filter((m) => m?.role && m?.content)
+      .map((m) => ({
+        role: m.role,
+        content: String(m.content),
+      }));
 
     const response = await fetch(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -89,38 +123,34 @@ app.post("/ai/chat", async (req, res) => {
           Authorization: `Bearer ${groqApiKey}`,
         },
         body: JSON.stringify({
-          model: groqModel,
-          messages,
+          model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+          messages: cleanedMessages,
           temperature,
         }),
       },
     );
 
+    const data = await response.json();
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage =
-        errorData?.error?.message || `Groq API error (${response.status})`;
-      throw new Error(errorMessage);
+      console.log("Groq error:", data);
+      return res.status(500).json({
+        error: data?.error?.message || "Erro na IA",
+      });
     }
 
-    const data = await response.json();
-    const reply =
-      data?.choices?.[0]?.message?.content ||
-      "Desculpe, não consegui processar sua mensagem.";
+    const reply = data?.choices?.[0]?.message?.content;
 
-    res.json({
-      role: "assistant",
-      content: reply,
+    return res.json({
+      content: reply || "Sem resposta da IA",
     });
   } catch (err) {
-    console.error("AI chat error:", err);
-    res.status(500).json({
-      error:
-        "Houve um problema ao processar sua solicitação. Por favor, tente novamente mais tarde.",
+    console.error(err);
+    return res.status(500).json({
+      error: "Erro interno no servidor de IA",
     });
   }
 });
-
 const io = new Server(server, {
   cors: {
     origin: CLIENT_ORIGIN,

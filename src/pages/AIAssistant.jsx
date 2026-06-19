@@ -274,7 +274,7 @@ export default function AIAssistant() {
 
     const scopedMsg = `${scopeInstruction}\n\nPergunta do profissional:\n${contextMsg}`;
 
-    const newMessages = [...messages, { role: "user", content: text }];
+    const newMessages = [...messages, { role: "user", content: scopedMsg }];
     setMessages(newMessages);
     setLoading(true);
 
@@ -299,27 +299,36 @@ export default function AIAssistant() {
           )
           .map((m) => ({
             role: m.role,
-            content:
-              m.role === "user" && m.content === text ? scopedMsg : m.content,
+            content: String(m.content || ""),
           })),
       ];
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      console.log("API URL:", import.meta.env.VITE_API_URL);
+      const response = await globalThis.fetch(
+        `${import.meta.env.VITE_API_URL}/ai/chat`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            messages: apiMessages,
+            temperature: 0.2,
+          }),
         },
-        body: JSON.stringify({
-          messages: apiMessages,
-          temperature: 0.2,
-        }),
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+
+        console.log("GROQ STATUS:", response.status);
+        console.log("GROQ ERROR RESPONSE:", errorData);
+
         const errorMessage =
-          errorData?.error?.message ||
+          errorData?.error ||
+          errorData?.message ||
           `Falha na integração da IA (${response.status})`;
+
         throw new Error(errorMessage);
       }
 
