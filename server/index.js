@@ -3,10 +3,25 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
-  // Create a single supabase client for interacting with your database
-    const supabase = createClient('https://kxiivljlnajkrrizewbm.supabase.co/', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5amp4ZXNyemNwdmZwbGxwcnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTI5MDgsImV4cCI6MjA5NTYyODkwOH0.sIF0qmmkSxpCcpv0_6ZMlfQ89or0YEZvXE60UHrpa6E')
+// Create a single supabase client for interacting with your database
+const supabase = createClient(
+  "https://kxiivljlnajkrrizewbm.supabase.co/",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4aWl2bGpsbmFqa3JyaXpld2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNTQwMzUsImV4cCI6MjA5NjczMDAzNX0.uVjVoVG9pFwYI2ZM627jthjHalfC-TJ9gzuQY_B8Jp8",
+);
+
+const getUserFromToken = async (req) => {
+  const token = req.headers.authorization?.replace("Bearer ", "");
+
+  if (!token) return null;
+
+  const { data, error } = await supabase.auth.getUser(token);
+
+  if (error || !data.user) return null;
+
+  return data.user;
+};
 const app = express();
 const server = http.createServer(app);
 
@@ -22,6 +37,26 @@ app.get("/health", (_req, res) => {
     service: "medicore-server",
     now: new Date().toISOString(),
   });
+});
+
+app.get("/users", async (req, res) => {
+  const user = await getUserFromToken(req);
+
+  if (!user) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const { data, error } = await supabase
+    .from("app_user")
+    .select("*")
+    .eq("email", user.email)
+    .maybeSingle();
+
+  if (error) {
+    return res.status(500).json({ error: error.message });
+  }
+
+  return res.json(data);
 });
 
 // Rota de chat com Groq (IA privada no backend)

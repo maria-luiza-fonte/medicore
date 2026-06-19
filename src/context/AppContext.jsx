@@ -1,4 +1,10 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  "https://kxiivljlnajkrrizewbm.supabase.co/",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt4aWl2bGpsbmFqa3JyaXpld2JtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNTQwMzUsImV4cCI6MjA5NjczMDAzNX0.uVjVoVG9pFwYI2ZM627jthjHalfC-TJ9gzuQY_B8Jp8",
+);
 
 const AppContext = createContext();
 
@@ -76,64 +82,78 @@ export function AppProvider({ children }) {
     return () => mediaQuery.removeEventListener("change", onThemeChange);
   }, [theme]);
 
-  const login = (email, password, professionalType = "doctor") => {
-    if (email && password) {
-      const userFound = systemUsers.find((u) => u.email === email);
-      const role = userFound?.role;
+  const loadUsers = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-      if (!role) {
-        return false;
+      const res = await fetch("http://localhost:4000/users", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        console.error("Erro ao carregar users");
+        return;
       }
 
-      const isAdmin = role === "admin";
-      const isVeterinary = professionalType === "veterinary" && !isAdmin;
-
-      if (isAdmin) {
-        const userData = {
-          name: "Admin",
-          email,
-          role: "admin",
-          avatar: "AD",
-          professionalType: "admin",
-        };
-        setUser(userData);
-        localStorage.setItem(
-          "mc-chat-user",
-          JSON.stringify({
-            userId: `admin:${email}`,
-            userName: userData.name,
-          }),
-        );
-        setActivePage("admin");
-      } else {
-        const userData = {
-          id: data.id,
-          name: data.name,
-          email: data.email,
-          role: data.role,
-          professionalType: data.role,
-          doctorId: data.id,
-        };
-        setUser(userData);
-        localStorage.setItem(
-          "mc-chat-user",
-          JSON.stringify({
-            userId: `doctor:${email}`,
-            userName: userData.name,
-          }),
-        );
-        setActivePage("dashboard");
-      }
-      return true;
+      const data = await res.json();
+      setSystemUsers(data);
+    } catch (err) {
+      console.error("Erro de rede ao carregar users:", err);
     }
-    return false;
   };
 
-  const logout = () => {
+  const login = async (email, password) => {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) return false;
+
+    const authUser = data.user;
+
+    const name = authUser.user_metadata?.name || authUser.email.split("@")[0];
+
+    const getInitials = (name = "") => {
+      const parts = name.trim().split(" ").filter(Boolean);
+
+      if (parts.length === 1) {
+        return parts[0].slice(0, 2).toUpperCase();
+      }
+
+      return parts
+        .slice(0, 2)
+        .map((p) => p[0])
+        .join("")
+        .toUpperCase();
+    };
+
+    const avatar = getInitials(name);
+
+    setUser({
+      id: authUser.id,
+      email: authUser.email,
+      name,
+      avatar,
+    });
+
+    return true;
+
+    if (error) return false;
+
+    localStorage.setItem("token", data.session.access_token);
+    setUser(data.user);
+
+    return true;
+  };
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+
     setUser(null);
-    setActivePage("dashboard");
-    setShowLogin(true);
-    localStorage.removeItem("mc-chat-user");
+    localStorage.removeItem("token");
   };
 
   const register = (name, email, password, professionalType, crm) => {
