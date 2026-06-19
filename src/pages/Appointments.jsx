@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
 
-/* const EMPTY = {
+const EMPTY = {
   patientId: "",
   patientName: "",
-  doctor: "Dr. Ricardo Mendes",
-  specialty: "Cardiologia",
+  doctor: "",
+  specialty: "",
   date: "",
   time: "",
   status: "pending",
@@ -18,7 +18,8 @@ const doctors = [
   "Dra. Beatriz Almeida",
   "Dr. Paulo Henrique",
   "Dra. Camila Torres",
-];*/
+];
+
 const specialties = [
   "Cardiologia",
   "Clínica Geral",
@@ -50,7 +51,11 @@ export default function Appointments() {
     patients,
     addUrgency,
   } = useApp();
-  const userPatients = patients.filter((p) => p.doctorId === user?.doctorId);
+
+  const userPatients = (patients || []).filter(
+    (p) => p.doctorId === user?.doctorId,
+  );
+
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [filterStatus, setFilterStatus] = useState("all");
@@ -59,13 +64,15 @@ export default function Appointments() {
   const [urgencyForm, setUrgencyForm] = useState({ reason: "", level: 2 });
   const [expandedId, setExpandedId] = useState(null);
 
-  const filtered = appointments
+  const filtered = (appointments || [])
     .filter((a) => a.doctor === user?.name)
     .filter((a) => {
       const matchStatus = filterStatus === "all" || a.status === filterStatus;
+
       const matchSearch =
-        a.patientName.toLowerCase().includes(search.toLowerCase()) ||
-        a.doctor.toLowerCase().includes(search.toLowerCase());
+        (a.patientName || "").toLowerCase().includes(search.toLowerCase()) ||
+        (a.doctor || "").toLowerCase().includes(search.toLowerCase());
+
       return matchStatus && matchSearch;
     });
 
@@ -108,7 +115,13 @@ export default function Appointments() {
         </div>
         <button
           className="btn btn-teal px-4 py-2"
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setForm((prev) => ({
+              ...prev,
+              doctor: user?.name || "",
+            }));
+            setShowModal(true);
+          }}
         >
           <i className="bi bi-calendar-plus me-2"></i>Nova Consulta
         </button>
@@ -157,7 +170,7 @@ export default function Appointments() {
       </div>
 
       {/* Appointments list with expandable cards */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 400 }}>
         {filtered.map((a) => {
           const isExpanded = expandedId === a.id;
           const appointmentDate = new Date(a.date + "T12:00");
@@ -507,9 +520,9 @@ export default function Appointments() {
                     value={form.patientId}
                     onChange={(e) => {
                       const p = userPatients.find(
-                        (p) => p.id === parseInt(e.target.value),
+                        (p) => String(p.id) === e.target.value,
                       );
-                      f("patientId", e.target.value);
+                      f("patientId", String(e.target.value));
                       f("patientName", p ? p.name : "");
                     }}
                   >

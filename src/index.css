@@ -107,6 +107,7 @@ body {
     border-color 0.2s,
     box-shadow 0.2s;
 }
+
 .mc-card:hover {
   border-color: rgba(15, 188, 182, 0.3);
   box-shadow: var(--mc-shadow-teal);
@@ -328,6 +329,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  justify-content: flex-start;
 }
 .mc-topbar {
   height: 60px;
@@ -345,6 +347,8 @@ body {
   flex: 1;
   padding: 28px;
   background: var(--mc-navy);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Page header */

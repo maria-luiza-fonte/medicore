@@ -112,7 +112,7 @@ export default function Patients() {
       </div>
 
       {/* Patients list with expandable cards */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 440 }}>
         {filtered.map((p) => {
           const age = Math.floor(
             (Date.now() - new Date(p.dob)) / (365.25 * 24 * 3600 * 1000),
