@@ -8,7 +8,7 @@ export default function Register() {
     email: "",
     password: "",
     confirmPassword: "",
-    professionalType: "medical",
+    professionalType: "doctor",
     crm: "",
   });
   const [error, setError] = useState("");
@@ -135,21 +135,21 @@ export default function Register() {
         <div className="mb-4" style={{ display: "flex", gap: 12 }}>
           <button
             type="button"
-            onClick={() => handleProfessionalTypeChange("medical")}
+            onClick={() => handleProfessionalTypeChange("doctor")}
             style={{
               flex: 1,
               padding: "12px 16px",
               borderRadius: 8,
               border:
-                formData.professionalType === "medical"
+                formData.professionalType === "doctor"
                   ? "2px solid var(--mc-teal)"
                   : "1px solid var(--mc-border)",
               background:
-                formData.professionalType === "medical"
+                formData.professionalType === "doctor"
                   ? "var(--mc-teal-pale)"
                   : "transparent",
               color:
-                formData.professionalType === "medical"
+                formData.professionalType === "doctor"
                   ? "var(--mc-teal)"
                   : "var(--mc-slate)",
               fontSize: 13,

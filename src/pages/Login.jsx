@@ -6,7 +6,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [professionalType, setProfessionalType] = useState("medical");
+  const [professionalType, setProfessionalType] = useState("doctor");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,7 +20,7 @@ export default function Login() {
     setLoading(true);
     setError("");
     await new Promise((r) => setTimeout(r, 800));
-    const ok = login(email, password, professionalType);
+    const ok = await login(email, password, professionalType);
     if (!ok) setError("Credenciais inválidas. Tente novamente.");
     setLoading(false);
   };
@@ -105,8 +105,8 @@ export default function Login() {
               <div className="d-flex gap-2" style={{ flexWrap: "wrap" }}>
                 <button
                   type="button"
-                  className={`btn ${professionalType === "medical" ? "btn-teal" : "btn-ghost"}`}
-                  onClick={() => handleProfessionalTypeChange("medical")}
+                  className={`btn ${professionalType === "doctor" ? "btn-teal" : "btn-ghost"}`}
+                  onClick={() => handleProfessionalTypeChange("doctor")}
                 >
                   <i className="bi bi-hospital me-2"></i>Médico
                 </button>

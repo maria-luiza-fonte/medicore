@@ -18,9 +18,6 @@ export default function Admin() {
   } = useApp();
 
   // Verificar se o usuário atual é admin
-  const currentUserAdmin = systemUsers.find(
-    (u) => u.name === user?.name || u.id === user?.id,
-  );
   const isCurrentUserAdmin = currentUserAdmin?.role === "admin";
 
   const [activeTab, setActiveTab] = useState("overview");

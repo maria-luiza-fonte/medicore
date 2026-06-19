@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useApp } from "../context/AppContext";
 
-const EMPTY = {
+/* const EMPTY = {
   patientId: "",
   patientName: "",
   doctor: "Dr. Ricardo Mendes",
@@ -18,7 +18,7 @@ const doctors = [
   "Dra. Beatriz Almeida",
   "Dr. Paulo Henrique",
   "Dra. Camila Torres",
-];
+];*/
 const specialties = [
   "Cardiologia",
   "Clínica Geral",

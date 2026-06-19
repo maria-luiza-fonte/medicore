@@ -3,7 +3,10 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import { Server } from "socket.io";
+import { createClient } from '@supabase/supabase-js'
 
+  // Create a single supabase client for interacting with your database
+    const supabase = createClient('https://kxiivljlnajkrrizewbm.supabase.co/', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5amp4ZXNyemNwdmZwbGxwcnVzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAwNTI5MDgsImV4cCI6MjA5NTYyODkwOH0.sIF0qmmkSxpCcpv0_6ZMlfQ89or0YEZvXE60UHrpa6E')
 const app = express();
 const server = http.createServer(app);
 

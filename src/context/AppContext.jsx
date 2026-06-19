@@ -76,16 +76,23 @@ export function AppProvider({ children }) {
     return () => mediaQuery.removeEventListener("change", onThemeChange);
   }, [theme]);
 
-  const login = (email, password, professionalType = "medical") => {
+  const login = (email, password, professionalType = "doctor") => {
     if (email && password) {
-      const isAdmin = email.includes("admin");
+      const userFound = systemUsers.find((u) => u.email === email);
+      const role = userFound?.role;
+
+      if (!role) {
+        return false;
+      }
+
+      const isAdmin = role === "admin";
       const isVeterinary = professionalType === "veterinary" && !isAdmin;
 
       if (isAdmin) {
         const userData = {
           name: "Admin",
           email,
-          role: "Administrador — Gerenciamento do Sistema",
+          role: "admin",
           avatar: "AD",
           professionalType: "admin",
         };
@@ -99,16 +106,13 @@ export function AppProvider({ children }) {
         );
         setActivePage("admin");
       } else {
-        const doctorId = isVeterinary ? 3 : email.includes("ricardo") ? 1 : 2;
         const userData = {
-          name: isVeterinary ? "Dra. Camila Rocha" : "Dr. Ricardo Mendes",
-          email,
-          role: isVeterinary
-            ? "Médica Veterinária — Clínica de Pequenos Animais"
-            : "Médico — Cardiologia",
-          avatar: isVeterinary ? "CR" : "RM",
-          professionalType,
-          doctorId,
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          professionalType: data.role,
+          doctorId: data.id,
         };
         setUser(userData);
         localStorage.setItem(
@@ -134,27 +138,24 @@ export function AppProvider({ children }) {
 
   const register = (name, email, password, professionalType, crm) => {
     if (name && email && password && crm) {
-      const isVeterinary = professionalType === "veterinary";
-      const doctorId = isVeterinary ? 3 : email.includes("ricardo") ? 1 : 2;
       const avatar = name
         .split(" ")
         .slice(0, 2)
         .map((n) => n[0])
         .join("")
         .toUpperCase();
+
       setUser({
         name,
         email,
-        role: isVeterinary
-          ? "Médica Veterinária — Clínica de Pequenos Animais"
-          : "Médico — Cardiologia",
-        avatar,
         professionalType,
         crm,
-        doctorId,
+        avatar,
       });
+
       return true;
     }
+
     return false;
   };
 
